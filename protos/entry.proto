@@ -6,9 +6,9 @@ import "timestamp.proto";
 import "file.proto";
 
 message Source {
-	Entity entity = 1;
-	string url = 2;
-	repeated string titles = 4;
+	Entity entity = 1; // Source entity
+	string url = 2; // URL of source, usually a website specific to entry
+	repeated string titles = 4; // Titles of source, canonical is first
 }
 
 message Entry {
@@ -16,15 +16,14 @@ message Entry {
 		QUOTE = 0;
 		IMAGE = 1;
 	};
-	string id = 1;
-	Kind kind = 2;
-	Source source = 3;
-	repeated string titles = 4;
-	repeated File files = 5;
-	string description = 6;
-	repeated Entity creators = 7;
-	google.protobuf.Timestamp found_at = 8;
-	google.protobuf.Timestamp published_at = 9;
-	google.protobuf.Timestamp created_at = 10;
-	google.protobuf.Timestamp updated_at = 11;
+	string id = 1; // unique ID for entry
+	Kind kind = 2; // kind of entry
+	Source source = 3; // Source of entry
+	repeated string titles = 4; // Titles of entry, canonical is first
+	repeated File files = 5; // Files for entry, canonical is first
+	string description = 6; // Description of entry for display
+	repeated Entity creators = 7; // Creators of entry (Author/Painter, etc)
+	google.protobuf.Timestamp published_at = 9; // Work created at data, may be empty
+	google.protobuf.Timestamp created_at = 10; // Entry created in magada at 
+	google.protobuf.Timestamp updated_at = 11; // Entry updated at
 }

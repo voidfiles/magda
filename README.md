@@ -132,17 +132,16 @@ Great question. I don't know exactly.
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| id | [string](#string) |  |  |
-| kind | [Entry.Kind](#magda.Entry.Kind) |  |  |
-| source | [Source](#magda.Source) |  |  |
-| titles | [string](#string) | repeated |  |
-| files | [File](#magda.File) | repeated |  |
-| description | [string](#string) |  |  |
-| creators | [Entity](#magda.Entity) | repeated |  |
-| found_at | [google.protobuf.Timestamp](#google.protobuf.Timestamp) |  |  |
-| published_at | [google.protobuf.Timestamp](#google.protobuf.Timestamp) |  |  |
-| created_at | [google.protobuf.Timestamp](#google.protobuf.Timestamp) |  |  |
-| updated_at | [google.protobuf.Timestamp](#google.protobuf.Timestamp) |  |  |
+| id | [string](#string) |  | unique ID for entry |
+| kind | [Entry.Kind](#magda.Entry.Kind) |  | kind of entry |
+| source | [Source](#magda.Source) |  | Source of entry |
+| titles | [string](#string) | repeated | Titles of entry, canonical is first |
+| files | [File](#magda.File) | repeated | Files for entry, canonical is first |
+| description | [string](#string) |  | Description of entry for display |
+| creators | [Entity](#magda.Entity) | repeated | Creators of entry (Author/Painter, etc) |
+| published_at | [google.protobuf.Timestamp](#google.protobuf.Timestamp) |  | Work created at data, may be empty |
+| created_at | [google.protobuf.Timestamp](#google.protobuf.Timestamp) |  | Entry created in magada at |
+| updated_at | [google.protobuf.Timestamp](#google.protobuf.Timestamp) |  | Entry updated at |
 
 
 
@@ -157,9 +156,9 @@ Great question. I don't know exactly.
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| entity | [Entity](#magda.Entity) |  |  |
-| url | [string](#string) |  |  |
-| titles | [string](#string) | repeated |  |
+| entity | [Entity](#magda.Entity) |  | Source entity |
+| url | [string](#string) |  | URL of source, usually a website specific to entry |
+| titles | [string](#string) | repeated | Titles of source, canonical is first |
 
 
 

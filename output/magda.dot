@@ -21,21 +21,6 @@ digraph protodot {
 
 
 	/* ------ nodes ------ */
-
-	/* ------ leaving the root package unwrapped ------ */
-	Node_Ja_109	[shape=plaintext tooltip="magda.EntryRequest" label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" BGCOLOR="#fffaf0"><TR><TD COLSPAN="4" PORT="header" BGCOLOR="#e31a1c" ALIGN="right"><b>EntryRequest</b></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">1</TD><TD ALIGN="left">id</TD><TD BGCOLOR="#a6cee3" PORT="poid" ALIGN="right" TITLE="string"><i>string</i></TD></TR></TABLE>>];
-	
-	Node_Ja_107	[shape=plaintext tooltip="MagdaService" label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" BGCOLOR="#ffd700"><TR><TD COLSPAN="3" PORT="header" BGCOLOR="#ff7f50" ALIGN="right"><b>MagdaService</b></TD></TR><TR><TD ALIGN="left"><b>GetEntry</b></TD><TD></TD><TD PORT="poGetEntry_request" ALIGN="right">EntryRequest</TD></TR><TR style="border-bottom: 1px solid red"><TD></TD><TD BGCOLOR="#ff7f50"></TD><TD PORT="poGetEntry_response" ALIGN="right" BGCOLOR="#ff7f50">EntryResponse</TD></TR></TABLE>>];
-	Node_Ja_110	[shape=plaintext tooltip="magda.EntryResponse" label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" BGCOLOR="#fffaf0"><TR><TD COLSPAN="4" PORT="header" BGCOLOR="#e31a1c" ALIGN="right"><b>EntryResponse</b></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">1</TD><TD ALIGN="left">entry</TD><TD BGCOLOR="#fb9a99" PORT="poentry" ALIGN="right"><b>Entry</b></TD></TR></TABLE>>];
-	subgraph cluster_8b180d234311 {
-		label = "file.proto"
-		tooltip = "file.proto"
-		style = filled;
-		fillcolor = "#caff70";
-		
-		Node_Ja_101	[shape=plaintext tooltip="magda.File" label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" BGCOLOR="#fffaf0"><TR><TD COLSPAN="4" PORT="header" BGCOLOR="#e31a1c" ALIGN="right"><b>File</b></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">1</TD><TD ALIGN="left">path</TD><TD BGCOLOR="#a6cee3" PORT="popath" ALIGN="right" TITLE="string"><i>string</i></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">2</TD><TD ALIGN="left">source_url</TD><TD BGCOLOR="#a6cee3" PORT="posource_url" ALIGN="right" TITLE="string"><i>string</i></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">3</TD><TD ALIGN="left">content_type</TD><TD BGCOLOR="#a6cee3" PORT="pocontent_type" ALIGN="right" TITLE="string"><i>string</i></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">4</TD><TD ALIGN="left">filename</TD><TD BGCOLOR="#a6cee3" PORT="pofilename" ALIGN="right" TITLE="string"><i>string</i></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">5</TD><TD ALIGN="left">width</TD><TD BGCOLOR="#a6cee3" PORT="powidth" ALIGN="right" TITLE="int64"><i>int64</i></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">6</TD><TD ALIGN="left">hieght</TD><TD BGCOLOR="#a6cee3" PORT="pohieght" ALIGN="right" TITLE="int64"><i>int64</i></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">7</TD><TD ALIGN="left">created_at</TD><TD BGCOLOR="#fb9a99" PORT="pocreated_at" ALIGN="right"><b>google.protobuf.Timestamp</b></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">8</TD><TD ALIGN="left">updated_at</TD><TD BGCOLOR="#fb9a99" PORT="poupdated_at" ALIGN="right"><b>google.protobuf.Timestamp</b></TD></TR></TABLE>>];
-	}
-
 	subgraph cluster_9d1e3c2635ff {
 		label = "magda"
 		tooltip = "magda"
@@ -46,16 +31,12 @@ digraph protodot {
 		Node_Ja_103	[shape=plaintext tooltip="Kind" label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" BGCOLOR="#b2df8a"><TR><TD COLSPAN="2" PORT="header" BGCOLOR="#33a02c" ALIGN="right">enum <b>Kind</b></TD></TR><TR><TD BGCOLOR="#b2df8a" ALIGN="left">PERSON</TD><TD BGCOLOR="#b2df8a" ALIGN="left">0</TD></TR><TR><TD BGCOLOR="#b2df8a" ALIGN="left">ORGANIZATION</TD><TD BGCOLOR="#b2df8a" ALIGN="left">1</TD></TR></TABLE>>];
 	}
 
-	subgraph cluster_b5eb5ae3708a {
-		label = "entry.proto"
-		tooltip = "entry.proto"
-		style = filled;
-		fillcolor = "#caff70";
-		
-		Node_Ja_104	[shape=plaintext tooltip="magda.Source" label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" BGCOLOR="#fffaf0"><TR><TD COLSPAN="4" PORT="header" BGCOLOR="#e31a1c" ALIGN="right"><b>Source</b></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">1</TD><TD ALIGN="left">entity</TD><TD BGCOLOR="#fb9a99" PORT="poentity" ALIGN="right"><b>Entity</b></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">2</TD><TD ALIGN="left">url</TD><TD BGCOLOR="#a6cee3" PORT="pourl" ALIGN="right" TITLE="string"><i>string</i></TD></TR><TR><TD ALIGN="right">[...]</TD><TD ALIGN="right">4</TD><TD ALIGN="left">titles</TD><TD BGCOLOR="#a6cee3" PORT="potitles" ALIGN="right" TITLE="string"><i>string</i></TD></TR></TABLE>>];
-		Node_Ja_105	[shape=plaintext tooltip="magda.Entry" label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" BGCOLOR="#fffaf0"><TR><TD COLSPAN="4" PORT="header" BGCOLOR="#e31a1c" ALIGN="right"><b>Entry</b></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">1</TD><TD ALIGN="left">id</TD><TD BGCOLOR="#a6cee3" PORT="poid" ALIGN="right" TITLE="string"><i>string</i></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">2</TD><TD ALIGN="left">kind</TD><TD BGCOLOR="#b2df8a" PORT="pokind" ALIGN="right"><u>Kind</u></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">3</TD><TD ALIGN="left">source</TD><TD BGCOLOR="#fb9a99" PORT="posource" ALIGN="right"><b>Source</b></TD></TR><TR><TD ALIGN="right">[...]</TD><TD ALIGN="right">4</TD><TD ALIGN="left">titles</TD><TD BGCOLOR="#a6cee3" PORT="potitles" ALIGN="right" TITLE="string"><i>string</i></TD></TR><TR><TD ALIGN="right">[...]</TD><TD ALIGN="right">5</TD><TD ALIGN="left">files</TD><TD BGCOLOR="#fb9a99" PORT="pofiles" ALIGN="right"><b>File</b></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">6</TD><TD ALIGN="left">description</TD><TD BGCOLOR="#a6cee3" PORT="podescription" ALIGN="right" TITLE="string"><i>string</i></TD></TR><TR><TD ALIGN="right">[...]</TD><TD ALIGN="right">7</TD><TD ALIGN="left">creators</TD><TD BGCOLOR="#fb9a99" PORT="pocreators" ALIGN="right"><b>Entity</b></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">8</TD><TD ALIGN="left">found_at</TD><TD BGCOLOR="#fb9a99" PORT="pofound_at" ALIGN="right"><b>google.protobuf.Timestamp</b></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">9</TD><TD ALIGN="left">published_at</TD><TD BGCOLOR="#fb9a99" PORT="popublished_at" ALIGN="right"><b>google.protobuf.Timestamp</b></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">10</TD><TD ALIGN="left">created_at</TD><TD BGCOLOR="#fb9a99" PORT="pocreated_at" ALIGN="right"><b>google.protobuf.Timestamp</b></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">11</TD><TD ALIGN="left">updated_at</TD><TD BGCOLOR="#fb9a99" PORT="poupdated_at" ALIGN="right"><b>google.protobuf.Timestamp</b></TD></TR></TABLE>>];
-	}
 
+	/* ------ leaving the root package unwrapped ------ */
+	Node_Ja_109	[shape=plaintext tooltip="magda.EntryRequest" label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" BGCOLOR="#fffaf0"><TR><TD COLSPAN="4" PORT="header" BGCOLOR="#e31a1c" ALIGN="right"><b>EntryRequest</b></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">1</TD><TD ALIGN="left">id</TD><TD BGCOLOR="#a6cee3" PORT="poid" ALIGN="right" TITLE="string"><i>string</i></TD></TR></TABLE>>];
+	Node_Ja_110	[shape=plaintext tooltip="magda.EntryResponse" label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" BGCOLOR="#fffaf0"><TR><TD COLSPAN="4" PORT="header" BGCOLOR="#e31a1c" ALIGN="right"><b>EntryResponse</b></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">1</TD><TD ALIGN="left">entry</TD><TD BGCOLOR="#fb9a99" PORT="poentry" ALIGN="right"><b>Entry</b></TD></TR></TABLE>>];
+	
+	Node_Ja_107	[shape=plaintext tooltip="MagdaService" label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" BGCOLOR="#ffd700"><TR><TD COLSPAN="3" PORT="header" BGCOLOR="#ff7f50" ALIGN="right"><b>MagdaService</b></TD></TR><TR><TD ALIGN="left"><b>GetEntry</b></TD><TD></TD><TD PORT="poGetEntry_request" ALIGN="right">EntryRequest</TD></TR><TR style="border-bottom: 1px solid red"><TD></TD><TD BGCOLOR="#ff7f50"></TD><TD PORT="poGetEntry_response" ALIGN="right" BGCOLOR="#ff7f50">EntryResponse</TD></TR></TABLE>>];
 	subgraph cluster_5627932c6abb {
 		label = "timestamp.proto"
 		tooltip = "timestamp.proto"
@@ -74,26 +55,44 @@ digraph protodot {
 		Node_Ja_102	[shape=plaintext tooltip="magda.Entity" label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" BGCOLOR="#fffaf0"><TR><TD COLSPAN="4" PORT="header" BGCOLOR="#e31a1c" ALIGN="right"><b>Entity</b></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">1</TD><TD ALIGN="left">id</TD><TD BGCOLOR="#a6cee3" PORT="poid" ALIGN="right" TITLE="string"><i>string</i></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">2</TD><TD ALIGN="left">kind</TD><TD BGCOLOR="#b2df8a" PORT="pokind" ALIGN="right"><u>Kind</u></TD></TR><TR><TD ALIGN="right">[...]</TD><TD ALIGN="right">3</TD><TD ALIGN="left">names</TD><TD BGCOLOR="#a6cee3" PORT="ponames" ALIGN="right" TITLE="string"><i>string</i></TD></TR><TR><TD ALIGN="right">[...]</TD><TD ALIGN="right">4</TD><TD ALIGN="left">urls</TD><TD BGCOLOR="#a6cee3" PORT="pourls" ALIGN="right" TITLE="string"><i>string</i></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">5</TD><TD ALIGN="left">description</TD><TD BGCOLOR="#a6cee3" PORT="podescription" ALIGN="right" TITLE="string"><i>string</i></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">6</TD><TD ALIGN="left">created_at</TD><TD BGCOLOR="#fb9a99" PORT="pocreated_at" ALIGN="right"><b>google.protobuf.Timestamp</b></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">7</TD><TD ALIGN="left">updated_at</TD><TD BGCOLOR="#fb9a99" PORT="poupdated_at" ALIGN="right"><b>google.protobuf.Timestamp</b></TD></TR><TR><TD ALIGN="right">[...]</TD><TD ALIGN="right">8</TD><TD ALIGN="left">files</TD><TD BGCOLOR="#fb9a99" PORT="pofiles" ALIGN="right"><b>File</b></TD></TR></TABLE>>];
 	}
 
+	subgraph cluster_8b180d234311 {
+		label = "file.proto"
+		tooltip = "file.proto"
+		style = filled;
+		fillcolor = "#caff70";
+		
+		Node_Ja_101	[shape=plaintext tooltip="magda.File" label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" BGCOLOR="#fffaf0"><TR><TD COLSPAN="4" PORT="header" BGCOLOR="#e31a1c" ALIGN="right"><b>File</b></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">1</TD><TD ALIGN="left">path</TD><TD BGCOLOR="#a6cee3" PORT="popath" ALIGN="right" TITLE="string"><i>string</i></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">2</TD><TD ALIGN="left">source_url</TD><TD BGCOLOR="#a6cee3" PORT="posource_url" ALIGN="right" TITLE="string"><i>string</i></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">3</TD><TD ALIGN="left">content_type</TD><TD BGCOLOR="#a6cee3" PORT="pocontent_type" ALIGN="right" TITLE="string"><i>string</i></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">4</TD><TD ALIGN="left">filename</TD><TD BGCOLOR="#a6cee3" PORT="pofilename" ALIGN="right" TITLE="string"><i>string</i></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">5</TD><TD ALIGN="left">width</TD><TD BGCOLOR="#a6cee3" PORT="powidth" ALIGN="right" TITLE="int64"><i>int64</i></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">6</TD><TD ALIGN="left">hieght</TD><TD BGCOLOR="#a6cee3" PORT="pohieght" ALIGN="right" TITLE="int64"><i>int64</i></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">7</TD><TD ALIGN="left">created_at</TD><TD BGCOLOR="#fb9a99" PORT="pocreated_at" ALIGN="right"><b>google.protobuf.Timestamp</b></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">8</TD><TD ALIGN="left">updated_at</TD><TD BGCOLOR="#fb9a99" PORT="poupdated_at" ALIGN="right"><b>google.protobuf.Timestamp</b></TD></TR></TABLE>>];
+	}
+
+	subgraph cluster_b5eb5ae3708a {
+		label = "entry.proto"
+		tooltip = "entry.proto"
+		style = filled;
+		fillcolor = "#caff70";
+		
+		Node_Ja_105	[shape=plaintext tooltip="magda.Entry" label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" BGCOLOR="#fffaf0"><TR><TD COLSPAN="4" PORT="header" BGCOLOR="#e31a1c" ALIGN="right"><b>Entry</b></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">1</TD><TD ALIGN="left">id</TD><TD BGCOLOR="#a6cee3" PORT="poid" ALIGN="right" TITLE="string"><i>string</i></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">2</TD><TD ALIGN="left">kind</TD><TD BGCOLOR="#b2df8a" PORT="pokind" ALIGN="right"><u>Kind</u></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">3</TD><TD ALIGN="left">source</TD><TD BGCOLOR="#fb9a99" PORT="posource" ALIGN="right"><b>Source</b></TD></TR><TR><TD ALIGN="right">[...]</TD><TD ALIGN="right">4</TD><TD ALIGN="left">titles</TD><TD BGCOLOR="#a6cee3" PORT="potitles" ALIGN="right" TITLE="string"><i>string</i></TD></TR><TR><TD ALIGN="right">[...]</TD><TD ALIGN="right">5</TD><TD ALIGN="left">files</TD><TD BGCOLOR="#fb9a99" PORT="pofiles" ALIGN="right"><b>File</b></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">6</TD><TD ALIGN="left">description</TD><TD BGCOLOR="#a6cee3" PORT="podescription" ALIGN="right" TITLE="string"><i>string</i></TD></TR><TR><TD ALIGN="right">[...]</TD><TD ALIGN="right">7</TD><TD ALIGN="left">creators</TD><TD BGCOLOR="#fb9a99" PORT="pocreators" ALIGN="right"><b>Entity</b></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">9</TD><TD ALIGN="left">published_at</TD><TD BGCOLOR="#fb9a99" PORT="popublished_at" ALIGN="right"><b>google.protobuf.Timestamp</b></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">10</TD><TD ALIGN="left">created_at</TD><TD BGCOLOR="#fb9a99" PORT="pocreated_at" ALIGN="right"><b>google.protobuf.Timestamp</b></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">11</TD><TD ALIGN="left">updated_at</TD><TD BGCOLOR="#fb9a99" PORT="poupdated_at" ALIGN="right"><b>google.protobuf.Timestamp</b></TD></TR></TABLE>>];
+		Node_Ja_104	[shape=plaintext tooltip="magda.Source" label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" BGCOLOR="#fffaf0"><TR><TD COLSPAN="4" PORT="header" BGCOLOR="#e31a1c" ALIGN="right"><b>Source</b></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">1</TD><TD ALIGN="left">entity</TD><TD BGCOLOR="#fb9a99" PORT="poentity" ALIGN="right"><b>Entity</b></TD></TR><TR><TD ALIGN="right"></TD><TD ALIGN="right">2</TD><TD ALIGN="left">url</TD><TD BGCOLOR="#a6cee3" PORT="pourl" ALIGN="right" TITLE="string"><i>string</i></TD></TR><TR><TD ALIGN="right">[...]</TD><TD ALIGN="right">4</TD><TD ALIGN="left">titles</TD><TD BGCOLOR="#a6cee3" PORT="potitles" ALIGN="right" TITLE="string"><i>string</i></TD></TR></TABLE>>];
+	}
+
 
 	/* ------ connections ------ */
-	Node_Ja_105:pofiles:e	-> Node_Ja_101:header [color="#000000" tooltip="Ja_105 --> Ja_101"];
-	Node_Ja_105:popublished_at:e	-> Node_Ja_100:header [color="#000000" tooltip="Ja_105 --> Ja_100"];
-	Node_Ja_102:pokind:e	-> Node_Ja_103 [color="#008000" tooltip="Ja_102 --> Ja_103"];
-	Node_Ja_102:poupdated_at:e	-> Node_Ja_100:header [color="#000000" tooltip="Ja_102 --> Ja_100"];
-	Node_Ja_105:posource:e	-> Node_Ja_104:header [color="#000000" tooltip="Ja_105 --> Ja_104"];
-	Node_Ja_105:poupdated_at:e	-> Node_Ja_100:header [color="#000000" tooltip="Ja_105 --> Ja_100"];
-	Node_Ja_107:poGetEntry_request:e	-> Node_Ja_109:header [color="#000000" tooltip="Ja_107 --> Ja_109"];
-	Node_Ja_101:poupdated_at:e	-> Node_Ja_100:header [color="#000000" tooltip="Ja_101 --> Ja_100"];
-	Node_Ja_104:poentity:e	-> Node_Ja_102:header [color="#000000" tooltip="Ja_104 --> Ja_102"];
-	Node_Ja_105:pocreators:e	-> Node_Ja_102:header [color="#000000" tooltip="Ja_105 --> Ja_102"];
-	Node_Ja_105:pofound_at:e	-> Node_Ja_100:header [color="#000000" tooltip="Ja_105 --> Ja_100"];
-	Node_Ja_105:pocreated_at:e	-> Node_Ja_100:header [color="#000000" tooltip="Ja_105 --> Ja_100"];
+	Node_Ja_107:poGetEntry_response:e	-> Node_Ja_110:header [color="#000000" tooltip="Ja_107 --> Ja_110"];
 	Node_Ja_110:poentry:e	-> Node_Ja_105:header [color="#000000" tooltip="Ja_110 --> Ja_105"];
+	Node_Ja_102:poupdated_at:e	-> Node_Ja_100:header [color="#000000" tooltip="Ja_102 --> Ja_100"];
+	Node_Ja_104:poentity:e	-> Node_Ja_102:header [color="#000000" tooltip="Ja_104 --> Ja_102"];
+	Node_Ja_105:poupdated_at:e	-> Node_Ja_100:header [color="#000000" tooltip="Ja_105 --> Ja_100"];
+	Node_Ja_105:pokind:e	-> Node_Ja_106 [color="#008000" tooltip="Ja_105 --> Ja_106"];
+	Node_Ja_105:posource:e	-> Node_Ja_104:header [color="#000000" tooltip="Ja_105 --> Ja_104"];
+	Node_Ja_105:pofiles:e	-> Node_Ja_101:header [color="#000000" tooltip="Ja_105 --> Ja_101"];
+	Node_Ja_105:pocreators:e	-> Node_Ja_102:header [color="#000000" tooltip="Ja_105 --> Ja_102"];
+	Node_Ja_105:popublished_at:e	-> Node_Ja_100:header [color="#000000" tooltip="Ja_105 --> Ja_100"];
+	Node_Ja_105:pocreated_at:e	-> Node_Ja_100:header [color="#000000" tooltip="Ja_105 --> Ja_100"];
+	Node_Ja_107:poGetEntry_request:e	-> Node_Ja_109:header [color="#000000" tooltip="Ja_107 --> Ja_109"];
+	Node_Ja_101:pocreated_at:e	-> Node_Ja_100:header [color="#000000" tooltip="Ja_101 --> Ja_100"];
 	Node_Ja_102:pocreated_at:e	-> Node_Ja_100:header [color="#000000" tooltip="Ja_102 --> Ja_100"];
 	Node_Ja_102:pofiles:e	-> Node_Ja_101:header [color="#000000" tooltip="Ja_102 --> Ja_101"];
-	Node_Ja_105:pokind:e	-> Node_Ja_106 [color="#008000" tooltip="Ja_105 --> Ja_106"];
-	Node_Ja_107:poGetEntry_response:e	-> Node_Ja_110:header [color="#000000" tooltip="Ja_107 --> Ja_110"];
-	Node_Ja_101:pocreated_at:e	-> Node_Ja_100:header [color="#000000" tooltip="Ja_101 --> Ja_100"];
+	Node_Ja_101:poupdated_at:e	-> Node_Ja_100:header [color="#000000" tooltip="Ja_101 --> Ja_100"];
+	Node_Ja_102:pokind:e	-> Node_Ja_103 [color="#008000" tooltip="Ja_102 --> Ja_103"];
 
-	/* generated by github.com/seamia/protodot on Monday, 17-Feb-20 13:58:18 MST */
+	/* generated by github.com/seamia/protodot on Monday, 17-Feb-20 14:06:47 MST */
 }
