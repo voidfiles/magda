@@ -39,5 +39,5 @@ To regenerate the support tools run: `make compile`
 
 # Data Model
 
-![Data Model](https://raw.githubusercontent.com/voidfiles/magda/master/output/magda.dot.png "Output")
+![Data Model](https://raw.githubusercontent.com/voidfiles/magda/master/gen/magda.dot.png "Output")
 
