@@ -17,4 +17,4 @@ Great question. I don't know exactly.
 
 # Data Model
 
-![Data Model](./raw/master/output/magda.dot.svg "Output")
+![Data Model](https://raw.githubusercontent.com/voidfiles/magda/master/output/magda.dot.png "Output")
