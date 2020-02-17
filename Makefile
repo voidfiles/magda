@@ -20,8 +20,14 @@ compile:
 	mkdir -p $(DST_DIR)
 	protoc -I=$(PROTODIR) \
 	    --go_out=$(DST_DIR) \
+		--doc_out=$(DST_DIR) \
+		--doc_opt=markdown,docs.md \
 		${PROTODIR}/service.proto \
 		${PROTODIR}/entry.proto \
 		${PROTODIR}/file.proto \
 		${PROTODIR}/entity.proto
 	$(WORKDIR)/protodot -config protodot/config.json -src protos/service.proto -output magda
+
+	rm -fR README.md
+	cat README.raw.md > README.md
+	cat output/docs.md >> README.md

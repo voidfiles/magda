@@ -4,12 +4,12 @@ package magda;
 import "timestamp.proto";
 
 message File {
-    string path = 1;
-    string source_url = 2;
-    string content_type = 3;
-    string filename = 4;
-    int64 width = 5;
-    int64 hieght = 6;
-    google.protobuf.Timestamp created_at = 7;
-    google.protobuf.Timestamp updated_at = 8;
+	string path = 1;
+	string source_url = 2;
+	string content_type = 3;
+	string filename = 4;
+	int64 width = 5;
+	int64 hieght = 6;
+	google.protobuf.Timestamp created_at = 7;
+	google.protobuf.Timestamp updated_at = 8;
 };
