@@ -14,6 +14,28 @@ Magda is my attempt to build a platform for that experience.
 
 Great question. I don't know exactly.
 
+## Contributors
+
+**Prerequists**: Right now, you need to have working go environment.
+
+Then you can run: `make setup` to install required tools.
+
+To regenerate the support tools run: `make compile`
+
+## The Plan
+
+- [] Create the data model
+    - [] Entrys
+    - [] Entitys
+    - [] Collections
+- [] Create an API
+- [] Create mockups of some of the screens
+- [] Create a storybook for the components
+- [] Figure out the Authentication story
+    - [] Roles
+        - [] Viewer (possibly anonymous), can look at collections
+        - [] User (Can add things to the system that belong to them)
+        - [] Admin (Can do anything )
 
 # Data Model
 
