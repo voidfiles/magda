@@ -1,0 +1,30 @@
+syntax = "proto3";
+package magda;
+
+import "entity.proto";
+import "timestamp.proto";
+import "file.proto";
+
+message Source {
+    Entity entity = 1;
+    string url = 2;
+    repeated string titles = 4;
+}
+
+message Entry {
+    enum Kind {
+        QUOTE = 0;
+        IMAGE = 1;
+    };
+    string id = 1;
+    Kind kind = 2;
+    Source source = 3;
+    repeated string titles = 4;
+    repeated File files = 5;
+    string description = 6;
+    repeated Entity creators = 7;
+    google.protobuf.Timestamp found_at = 8;
+    google.protobuf.Timestamp published_at = 9;
+    google.protobuf.Timestamp created_at = 10;
+    google.protobuf.Timestamp updated_at = 11;
+}

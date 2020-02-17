@@ -1,0 +1,9 @@
+{
+    "protoc": {
+        "path": "/usr/local/bin/protoc",
+        "options": [
+            "--proto_path=protos/",
+            "--go_out==gen/go"
+        ]
+    }
+}

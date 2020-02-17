@@ -1,0 +1,16 @@
+syntax = "proto3";
+package magda;
+
+import "entry.proto";
+
+service MagdaService {
+    rpc GetEntry (EntryRequest) returns (EntryResponse);
+}
+
+message EntryRequest {
+    string id = 1;
+}
+  
+message EntryResponse {
+    Entry entry = 1;
+}
