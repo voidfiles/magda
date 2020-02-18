@@ -16,10 +16,10 @@ setup:
 	GOBIN=$(BINDIR) go install github.com/go-swagger/go-swagger/cmd/swagger
 
 generate:
-	$(GOSWAGGER) generate server -f swagger.yaml -a src
+	$(GOSWAGGER) generate server -f swagger.yaml -t src --with-expand
 
 validate:
 	$(GOSWAGGER) validate swagger.yaml
 
 serve:
-	$(GOSWAGGER) serve swagger.yaml
+	$(GOSWAGGER) serve swagger.yaml 
