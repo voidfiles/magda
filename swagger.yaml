@@ -5,12 +5,12 @@ info:
   description: >-
     This is a the API docs for magda
 securityDefinitions:
-  netlifyAuth:
-    type: oauth2
-    flow: implicit
-    authorizationUrl: https://app.netlify.com/authorize
+  bearerAuth:
+    type: http
+    scheme: bearer
+    bearerFormat: JWT  
 security:
-  - netlifyAuth: []
+  - bearerAuth: []
 consumes:
   - application/json
 produces:

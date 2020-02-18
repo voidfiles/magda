@@ -14,6 +14,35 @@ Magda is my attempt to build a platform for that experience.
 
 Great question. I don't know exactly.
 
+## Authentication 
+
+*Firebase*
+
+Right now this is going to use [firebase authentication](https://firebase.google.com/docs/auth/).
+
+I don't want to key off this to much. The application should be built with authenticaiton and authorization, but I want to keep it simple to begin with. Users should be able to see almost everythign except for like the user table. And only admins should be able to write anything, except maybe the user table. A user should be able to create their own user account.
+
+### User Model
+
+This will be stored in firebase, like /users/{uid}
+
+Right now it will contain a role field.
+
+### Roles
+
+*Anonymous*
+
+They can be viewered
+
+*User*
+
+They can maybe someday actually create things
+
+*Admin*
+
+Can modify almost anything in the system
+
+
 ## Contributors
 
 **Prerequists**: Right now, you need to have working go environment.
@@ -31,6 +60,10 @@ To regenerate the support tools run: `make generate`
     - [] Entrys
     - [] Entitys
     - [] Collections
+- [] Setup authorization
+    - [] Create a user model
+    - [] Only allow admins right now to make any changes
+    - [] Require authentication for all reads, use anonymous for folks who haven't signed up
 - [] Create an API
 - [] Create mockups of some of the screens
 - [] Create a storybook for the components
