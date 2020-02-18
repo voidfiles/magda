@@ -3,6 +3,8 @@
         "path": "/usr/local/bin/protoc",
         "options": [
             "--proto_path=protos/",
+            "-I=$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis",
+            "/usr/local/include",
             "--go_out==gen/go"
         ]
     }

@@ -1,11 +1,15 @@
 syntax = "proto3";
-package magda;
-option go_package = "github.com/voidfiles/magda/src/service";
+package service;
 
+import "google/api/annotations.proto";
 import "entry.proto";
 
 service MagdaService {
-	rpc GetEntry (EntryRequest) returns (EntryResponse);
+	rpc GetEntry (EntryRequest) returns (EntryResponse) {
+		option (google.api.http) = {
+			get: "/v1/entries/{id}"
+		};
+	}
 }
 
 message EntryRequest {

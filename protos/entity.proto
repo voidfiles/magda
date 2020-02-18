@@ -1,6 +1,5 @@
 syntax = "proto3";
-package magda;
-option go_package = "github.com/voidfiles/magda/src/service";
+package service;
 
 import "timestamp.proto";
 import "file.proto";

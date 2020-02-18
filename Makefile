@@ -1,4 +1,4 @@
-.SILENT: ; # no need for @
+# .SILENT: ; # no need for @
 PROJECT         =magda
 PROJECT_DIR		=$(shell pwd)
 
@@ -14,15 +14,20 @@ setup:
 	mkdir -p $(WORKDIR)
 	curl "$(PROTODOT_URL)" > $(WORKDIR)/protodot
 	chmod 755 $(WORKDIR)/protodot
-	go get -u github.com/pseudomuto/protoc-gen-doc/cmd/protoc-gen-doc
+	go get github.com/grpc-ecosystem/grpc-gateway
 
 compile:
 	mkdir -p $(DST_DIR)
 
-	protoc -I=$(PROTODIR) \
-	    --go_out=src/service \
+	protoc \
+		-I=$(PROTODIR) \
+		-I=/usr/local/include \
+		-I=${GOPATH}/src \
+		-I=${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
+		--go_out=plugins=grpc:src/service \
 		--doc_out=$(DST_DIR) \
 		--doc_opt=markdown,docs.md \
+		--grpc-gateway_out=logtostderr=true:src/service \
 		${PROTODIR}/service.proto \
 		${PROTODIR}/entry.proto \
 		${PROTODIR}/file.proto \

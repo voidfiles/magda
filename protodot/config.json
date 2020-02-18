@@ -106,6 +106,8 @@
 	"includes": [
 		"${HOME}/protodot/protoc-3.6.0/include",
 		"${GOPATH}/src/github.com/gogo/protobuf",
-		"${GOPATH}/src"
+		"${GOPATH}/src",
+		"/usr/local/include",
+		"${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis"
 	]
 }
