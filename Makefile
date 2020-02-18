@@ -20,3 +20,6 @@ generate:
 
 validate:
 	$(GOSWAGGER) validate swagger.yaml
+
+serve:
+	$(GOSWAGGER) serve swagger.yaml
