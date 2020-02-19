@@ -2,19 +2,133 @@
 
 package model
 
-type NewTodo struct {
-	Text   string `json:"text"`
-	UserID string `json:"userId"`
+import (
+	"fmt"
+	"io"
+	"strconv"
+	"time"
+)
+
+type Entity struct {
+	ID          string     `json:"id"`
+	Kind        EntityKind `json:"kind"`
+	Names       []string   `json:"names"`
+	Urls        []string   `json:"urls"`
+	Description *string    `json:"description"`
+	CreatedAt   time.Time  `json:"createdAt"`
+	UpdatedAt   time.Time  `json:"updatedAt"`
+	Files       []*File    `json:"files"`
 }
 
-type Todo struct {
-	ID   string `json:"id"`
-	Text string `json:"text"`
-	Done bool   `json:"done"`
-	User *User  `json:"user"`
+type Entry struct {
+	ID          string    `json:"id"`
+	Kind        EntryKind `json:"kind"`
+	Source      *Source   `json:"source"`
+	Titles      []string  `json:"titles"`
+	Files       []*File   `json:"files"`
+	Description *string   `json:"description"`
+	Creators    []*Entity `json:"creators"`
+	PublishedAt time.Time `json:"published_at"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
-type User struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+type File struct {
+	ID          string    `json:"id"`
+	Path        string    `json:"path"`
+	SourceURL   *string   `json:"sourceUrl"`
+	ContentType string    `json:"contentType"`
+	Filename    string    `json:"filename"`
+	Width       *int      `json:"width"`
+	Height      *int      `json:"height"`
+	CreatedAt   time.Time `json:"createdAt"`
+	UpdatedAt   time.Time `json:"updatedAt"`
+}
+
+type Source struct {
+	Entity *Entity  `json:"entity"`
+	URL    *string  `json:"url"`
+	Titles []string `json:"titles"`
+}
+
+type EntityKind string
+
+const (
+	EntityKindPerson       EntityKind = "person"
+	EntityKindOrganization EntityKind = "organization"
+)
+
+var AllEntityKind = []EntityKind{
+	EntityKindPerson,
+	EntityKindOrganization,
+}
+
+func (e EntityKind) IsValid() bool {
+	switch e {
+	case EntityKindPerson, EntityKindOrganization:
+		return true
+	}
+	return false
+}
+
+func (e EntityKind) String() string {
+	return string(e)
+}
+
+func (e *EntityKind) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = EntityKind(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid EntityKind", str)
+	}
+	return nil
+}
+
+func (e EntityKind) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type EntryKind string
+
+const (
+	EntryKindQuote EntryKind = "quote"
+	EntryKindImage EntryKind = "image"
+)
+
+var AllEntryKind = []EntryKind{
+	EntryKindQuote,
+	EntryKindImage,
+}
+
+func (e EntryKind) IsValid() bool {
+	switch e {
+	case EntryKindQuote, EntryKindImage:
+		return true
+	}
+	return false
+}
+
+func (e EntryKind) String() string {
+	return string(e)
+}
+
+func (e *EntryKind) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = EntryKind(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid EntryKind", str)
+	}
+	return nil
+}
+
+func (e EntryKind) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

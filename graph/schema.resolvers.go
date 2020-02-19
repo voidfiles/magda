@@ -10,16 +10,10 @@ import (
 	"github.com/voidfiles/magda/graph/model"
 )
 
-func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
+func (r *queryResolver) GetEntry(ctx context.Context, id string) (*model.Entry, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
-	panic(fmt.Errorf("not implemented"))
-}
+func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
-func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
-func (r *Resolver) Query() generated.QueryResolver       { return &queryResolver{r} }
-
-type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }

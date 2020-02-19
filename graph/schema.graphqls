@@ -1,28 +1,57 @@
-# GraphQL schema example
-#
-# https://gqlgen.com/getting-started/
-
-type Todo {
-  id: ID!
-  text: String!
-  done: Boolean!
-  user: User!
+enum EntryKind {
+    quote
+    image
 }
 
-type User {
+scalar Time
+
+type Entry {
   id: ID!
-  name: String!
+  kind: EntryKind!
+  source: Source!
+  titles: [String!]!
+  files: [File!]!
+  description: String
+  creators: [Entity!]!
+  published_at: Time!
+  created_at: Time!
+  updated_at: Time!
+}
+
+type Source {
+  entity: Entity!
+  url: String
+  titles: [String!]!
+}
+
+type File {
+    id: ID!
+    path: String!
+    sourceUrl: String
+    contentType: String!
+    filename: String!
+    width: Int
+    height: Int
+    createdAt: Time!
+    updatedAt: Time!
+}
+
+enum EntityKind {
+    person
+    organization
+}
+
+type Entity {
+    id: ID!
+    kind: EntityKind!
+    names: [String!]!
+    urls: [String!]!
+    description: String
+    createdAt: Time!
+    updatedAt: Time!
+    files: [File!]!
 }
 
 type Query {
-  todos: [Todo!]!
-}
-
-input NewTodo {
-  text: String!
-  userId: String!
-}
-
-type Mutation {
-  createTodo(input: NewTodo!): Todo!
+  getEntry(id: ID!): Entry!
 }
