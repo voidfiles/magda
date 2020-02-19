@@ -3,14 +3,12 @@ module github.com/voidfiles/magda
 go 1.13
 
 require (
-	github.com/go-openapi/errors v0.19.3
-	github.com/go-openapi/loads v0.19.4
-	github.com/go-openapi/runtime v0.19.11
-	github.com/go-openapi/spec v0.19.6
-	github.com/go-openapi/strfmt v0.19.4
-	github.com/go-openapi/swag v0.19.7
-	github.com/go-openapi/validate v0.19.6
-	github.com/go-swagger/go-swagger v0.22.0
-	github.com/jessevdk/go-flags v1.4.0
-	golang.org/x/net v0.0.0-20200114155413-6afb5195e5aa
+	github.com/99designs/gqlgen v0.11.1
+	github.com/gorilla/websocket v1.4.0 // indirect
+	github.com/kr/pretty v0.2.0 // indirect
+	github.com/mitchellh/mapstructure v1.1.2 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
+	github.com/vektah/gqlparser/v2 v2.0.1
+	golang.org/x/tools v0.0.0-20200131211209-ecb101ed6550 // indirect
+	gopkg.in/yaml.v2 v2.2.8 // indirect
 )

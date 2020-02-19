@@ -1,0 +1,57 @@
+enum EntryKind {
+    quote
+    image
+}
+
+scalar Time
+
+type Entry {
+  id: ID!
+  kind: EntryKind!
+  source: Source!
+  titles: [String!]!
+  files: [File!]!
+  description: String
+  creators: [Entity!]!
+  published_at: Time!
+  created_at: Time!
+  updated_at: Time!
+}
+
+type Source {
+  entity: Entity!
+  url: String
+  titles: [String!]!
+}
+
+type File {
+    id: ID!
+    path: String!
+    sourceUrl: String
+    contentType: String!
+    filename: String!
+    width: Int
+    height: Int
+    createdAt: Time!
+    updatedAt: Time!
+}
+
+type EntityKind {
+    person
+    organization
+}
+
+type Entity {
+    id: ID!
+    kind: EntityKind!
+    names: [String!]!
+    urls: [String!]!
+    description: String
+    createdAt: Time!
+    updatedAt: Time!
+    files: [File!]!
+}
+
+type Query {
+  getEntry(id: ID!): Entry!
+}

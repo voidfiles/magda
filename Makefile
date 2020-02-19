@@ -13,7 +13,7 @@ GOSWAGGER       :=$(BINDIR)/swagger
 
 setup:
 	mkdir -p $(WORKDIR)
-	GOBIN=$(BINDIR) go install github.com/go-swagger/go-swagger/cmd/swagger
+	GOBIN=$(BINDIR) go install github.com/99designs/gqlgen
 
 generate:
 	$(GOSWAGGER) generate server -f swagger.yaml -t src --with-expand

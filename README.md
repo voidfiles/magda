@@ -22,6 +22,10 @@ Right now this is going to use [firebase authentication](https://firebase.google
 
 I don't want to key off this to much. The application should be built with authenticaiton and authorization, but I want to keep it simple to begin with. Users should be able to see almost everythign except for like the user table. And only admins should be able to write anything, except maybe the user table. A user should be able to create their own user account.
 
+### JWTs 
+
+Firebase can create a JWT, that will be sent to the API as the authorization method.
+
 ### User Model
 
 This will be stored in firebase, like /users/{uid}

@@ -6,5 +6,5 @@ package tools
 // for more details
 
 import (
-	_ "github.com/go-swagger/go-swagger/cmd/swagger"
+	_ "github.com/99designs/gqlgen"
 )
