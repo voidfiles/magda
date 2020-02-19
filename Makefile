@@ -14,12 +14,7 @@ GOSWAGGER       :=$(BINDIR)/swagger
 setup:
 	mkdir -p $(WORKDIR)
 	GOBIN=$(BINDIR) go install github.com/99designs/gqlgen
+	cd www && yarn install
 
-generate:
-	$(GOSWAGGER) generate server -f swagger.yaml -t src --with-expand
-
-validate:
-	$(GOSWAGGER) validate swagger.yaml
-
-serve:
-	$(GOSWAGGER) serve swagger.yaml 
+run:
+	cd www && yarn serve

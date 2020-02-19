@@ -55,6 +55,8 @@ Then you can run: `make setup` to install required tools.
 
 To regenerate the support tools run: `make generate`
 
+You can run the webapp via `make run`
+
 ## The Plan
 
 - [] Swagger stuff
