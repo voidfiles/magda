@@ -3,6 +3,7 @@ import App from "./App.vue";
 import router from "./router";
 import store from "./store";
 import firebase from "firebase/app";
+import "firebase/auth";
 
 Vue.config.productionTip = false;
 
@@ -18,9 +19,12 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
+firebase.auth().onAuthStateChanged(user => {
+  store.dispatch("saveUser", user);
 
-new Vue({
-  router,
-  store,
-  render: h => h(App)
-}).$mount("#app");
+  new Vue({
+    router,
+    store,
+    render: h => h(App)
+  }).$mount("#app");
+});

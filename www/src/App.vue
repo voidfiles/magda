@@ -3,7 +3,12 @@
     <div id="nav">
       <router-link to="/">Home</router-link> |
       <router-link to="/about">About</router-link> |
-      <router-link to="/login">Login</router-link>
+      <span v-if="!user">
+        <router-link to="/login">Login</router-link>
+      </span>
+      <span v-if="user">
+        <router-link to="/signout" >SignOut</router-link>
+      </span>
     </div>
     <router-view />
   </div>
@@ -31,3 +36,16 @@
   }
 }
 </style>
+
+<script>
+import store from "./store";
+
+export default {
+  name: "App",
+  data: function() {
+    return {
+      user: store.getters.currentUser
+    };
+  }
+};
+</script>

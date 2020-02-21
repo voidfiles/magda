@@ -59,10 +59,7 @@ You can run the webapp via `make run`
 
 ## The Plan
 
-- [] Swagger stuff
-    - [] Fill out some URLs
-    - [] Understand my options for Autentication better.
-- [] Create the data model
+- [] Create the data model in GraphQL
     - [] Entrys
     - [] Entitys
     - [] Collections

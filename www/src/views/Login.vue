@@ -9,20 +9,25 @@ import "firebaseui/dist/firebaseui.css";
 
 export default {
   name: "Login",
-  mounted: () => {
+  props: ["redirect"],
+  mounted: function () {
     let ui = firebaseui.auth.AuthUI.getInstance();
     if (!ui) {
       ui = new firebaseui.auth.AuthUI(firebase.auth());
     }
-
+    let vm = this;
     var uiConfig = {
-      signInSuccessUrl: "/",
+      signInSuccessUrl: this.redirect,
+      credentialHelper: firebaseui.auth.CredentialHelper.NONE,
       signInOptions: [
         firebase.auth.EmailAuthProvider.PROVIDER_ID,
         firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID
       ]
     };
-    ui.start("#firebaseui-auth-container", uiConfig);
+
+    vm.$nextTick(() => {
+      ui.start("#firebaseui-auth-container", uiConfig);
+    });
   }
 };
 </script>
