@@ -68,6 +68,9 @@ You can run the webapp via `make run`
 
 ## The Plan
 
+- [] Authorization of go Service
+    - [] Setup a middleware
+    - [] Understand how logging is going to work accross 
 - [] Create the data model in GraphQL
     - [] Entrys
     - [] Entitys
