@@ -16,6 +16,15 @@ Great question. I don't know exactly.
 
 ## Authentication 
 
+User accounts are managed via firebase. But, firebase has relativley minimal user properties. So things like a user roles will need to be modeled in the datastore.
+
+Admin auth will be done based on firebase auth SDK
+
+*How to get your service credentials*
+
+1. Vist https://firebase.google.com/docs/admin/setup/
+2. Download your credential to `./service_account_key.json` this is ignored by .gitignore
+
 *Firebase*
 
 Right now this is going to use [firebase authentication](https://firebase.google.com/docs/auth/).
