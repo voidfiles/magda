@@ -36,9 +36,10 @@ func MustNewAuthMiddleware(handler http.Handler, logger *zerolog.Logger, client 
 }
 
 func (am AuthMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	logger := zerolog.Ctx(r.Context())
 	authHeader := r.Header.Get("Authorization")
 	if authHeader == "" {
-		am.logger.Error().Msgf("Request missing authorization header")
+		logger.Error().Msgf("Request missing authorization header")
 		http.Error(w, `{"error": {"code": "missing-header", "message": "Missing authorization header"}}`, http.StatusUnauthorized)
 		return
 	}
@@ -46,24 +47,25 @@ func (am AuthMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	authParts := strings.Fields(authHeader)
 
 	if strings.ToLower(authParts[0]) != "bearer" {
-		am.logger.Error().Msgf("Authorization header missing bearer schema: %v", authHeader)
+		logger.Error().Msgf("Authorization header missing bearer schema: %v", authHeader)
 		http.Error(w, `{"error": {"code": "missing-token", "message": "Authorization token must follow bearer scheme"}}`, http.StatusBadRequest)
 		return
 	}
 	if len(authParts) != 2 {
-		am.logger.Error().Msgf("Authorization header has too many parts %v", authHeader)
+		logger.Error().Msgf("Authorization header has too many parts %v", authHeader)
 		http.Error(w, `{"error": {"code": "missing-token", "message": "Authorization token must follow bearer scheme"}}`, http.StatusBadRequest)
 		return
 	}
 
 	token, err := am.client.VerifyIDToken(r.Context(), authParts[1])
 	if err != nil {
-		am.logger.Fatal().AnErr("error", err).Msg("error verifying ID token:")
+		logger.Error().AnErr("error", err).Msg("error verifying ID token:")
 		http.Error(w, `{"error": {"code": "unauthorized", "message": "Token is invalid"}}`, http.StatusUnauthorized)
 		return
 	}
 
-	childLogger := am.logger.With().Str("uid", token.UID).Logger()
+	childLogger := logger.With().Str("uid", token.UID).Logger()
+
 	r = r.WithContext(
 		context.WithValue(
 			childLogger.WithContext(r.Context()),
@@ -71,6 +73,6 @@ func (am AuthMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			token.UID,
 		),
 	)
-
+	childLogger.Log().Msg("request start")
 	am.handler.ServeHTTP(w, r)
 }

@@ -10,7 +10,6 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/hlog"
 	"github.com/voidfiles/magda/graph"
 	"github.com/voidfiles/magda/graph/generated"
 	"github.com/voidfiles/magda/pkg/server"
@@ -18,6 +17,20 @@ import (
 )
 
 const defaultPort = "8080"
+
+// RequestHandler adds the request method and URL as a field to the context's logger
+// using fieldKey as field key.
+func RequestHandler() func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			log := zerolog.Ctx(r.Context())
+			log.UpdateContext(func(c zerolog.Context) zerolog.Context {
+				return c.Str("method", r.Method).Str("path", r.URL.String())
+			})
+			next.ServeHTTP(w, r)
+		})
+	}
+}
 
 func main() {
 
@@ -32,10 +45,7 @@ func main() {
 	}
 
 	context := context.Background()
-	logger, err := server.MustNewLogger()
-	if err != nil {
-		log.Fatalf("error initializing logger: %v", err)
-	}
+	logger := server.MustNewLogger()
 
 	authClient, err := app.Auth(context)
 	if err != nil {
@@ -50,13 +60,17 @@ func main() {
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
 
 	authSrv := server.MustNewAuthMiddleware(srv, &logger, authClient)
-	loggerMiddleware := hlog.RequestHandler("request")
-	logSrv := loggerMiddleware(http.HandlerFunc(authSrv.ServeHTTP))
+	logSrv := RequestHandler()(http.HandlerFunc(authSrv.ServeHTTP))
 	finalSrv := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log := zerolog.Ctx(r.Context())
-		log.Info().Msg("Authorized Request")
+		localLogger := logger.With().Str("yo", "whats up").Logger()
+		r = r.WithContext(
+			localLogger.WithContext(
+				r.Context(),
+			),
+		)
 		logSrv.ServeHTTP(w, r)
 	})
+
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", finalSrv)
 

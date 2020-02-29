@@ -7,8 +7,8 @@ import (
 )
 
 // MustNewLogger returns a logger for the app
-func MustNewLogger() (zerolog.Logger, error) {
+func MustNewLogger() zerolog.Logger {
 	logger := zerolog.New(os.Stdout).With().Timestamp().Logger()
 
-	return logger, nil
+	return logger
 }
