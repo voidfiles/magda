@@ -16,5 +16,11 @@ setup:
 	GOBIN=$(BINDIR) go install github.com/99designs/gqlgen
 	cd www && yarn install
 
-run:
+server:
+	go run main.go
+
+frontend:
 	cd www && yarn serve
+
+run:
+	make server & make frontend

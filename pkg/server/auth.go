@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"context"
@@ -50,22 +50,27 @@ func (am AuthMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, `{"error": {"code": "missing-token", "message": "Authorization token must follow bearer scheme"}}`, http.StatusBadRequest)
 		return
 	}
-
-	if len(authParts) > 2 {
+	if len(authParts) != 2 {
 		am.logger.Error().Msgf("Authorization header has too many parts %v", authHeader)
 		http.Error(w, `{"error": {"code": "missing-token", "message": "Authorization token must follow bearer scheme"}}`, http.StatusBadRequest)
 		return
 	}
-	ctx := context.TODO()
-	token, err := am.client.VerifyIDToken(ctx, authParts[1])
+
+	token, err := am.client.VerifyIDToken(r.Context(), authParts[1])
 	if err != nil {
 		am.logger.Fatal().AnErr("error", err).Msg("error verifying ID token:")
+		http.Error(w, `{"error": {"code": "unauthorized", "message": "Token is invalid"}}`, http.StatusUnauthorized)
+		return
 	}
 
 	childLogger := am.logger.With().Str("uid", token.UID).Logger()
-	ctx = childLogger.WithContext(ctx)
-	ctx = context.WithValue(ctx, UIDContextKey, token.UID)
-	r = r.WithContext(ctx)
+	r = r.WithContext(
+		context.WithValue(
+			childLogger.WithContext(r.Context()),
+			UIDContextKey,
+			token.UID,
+		),
+	)
 
 	am.handler.ServeHTTP(w, r)
 }

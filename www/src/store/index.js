@@ -6,7 +6,6 @@ Vue.use(Vuex);
 export const mutations = {
   SAVE_USER: (state, user) => {
     state.auth.initialized = true;
-    console.log("Initialzing auth");
     if (user) {
       state.auth.authenticated = true;
       state.auth.user = user;
@@ -17,6 +16,7 @@ export const mutations = {
     }
   },
   SAVE_TOKEN: (state, token) => {
+    console.log("Updating token", token);
     state.auth.token = token;
   }
 };

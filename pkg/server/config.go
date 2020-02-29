@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"github.com/pkg/errors"
@@ -10,7 +10,7 @@ type Config struct {
 	GoogleApplicationCredentials string
 }
 
-func readConfig() (Config, error) {
+func ReadConfig() (Config, error) {
 	viper.AddConfigPath(".")
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {

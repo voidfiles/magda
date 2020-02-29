@@ -35,7 +35,6 @@ const routes = [
     component: Login,
     props: route => ({ redirect: route.query.redirect }),
     beforeEnter: (_to, _from, next) => {
-      console.log("store state", store.getters.currentUser);
       if (store.getters.currentUser) {
         next("/");
       } else {
@@ -54,7 +53,6 @@ const router = new VueRouter({
 router.beforeEach((to, _from, next) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {
     if (store.getters.currentUser) {
-      console.log("continuing to", to);
       next();
     } else {
       next({
