@@ -6,7 +6,7 @@ A platform for emmersing one self in the power of beauty, chance, and juxtaposit
 
 There are so many beautiful things in this world. Art, a quote, a picture from your loved ones. As we pass through life we are enriched when we encounter these things. But, so often they are hidden from our eye, or they are arranged so staticially that we miss out on all the new thigns being produced everyday.
 
-Wouldn't it be great if you could emerser you self in those touch points. For them to slowly evolve around you everyday. From your house, to your phone, to the screens around you.
+Wouldn't it be great if you could ermerse yourself in these touch points. For them to slowly evolve around you everyday. From your house, to your phone, to the screens around you.
 
 Magda is my attempt to build a platform for that experience.
 
@@ -68,18 +68,18 @@ You can run the webapp via `make run`
 
 ## The Plan
 
-- [] Authorization of go Service
+- [X] Authorization of go Service
     - [X] Setup a middleware
-    - [] Understand how logging is going to work accross middlewares
-        - [] This is going to require stacking middlewares togher
-- [] Create the data model in GraphQL
-    - [] Entrys
-    - [] Entitys
-    - [] Collections
+    - [X] Understand how logging is going to work accross middlewares
+        - [X] This is going to require stacking middlewares togher
 - [] Setup authorization
     - [] Create a user model
     - [] Only allow admins right now to make any changes
     - [] Require authentication for all reads, use anonymous for folks who haven't signed up
+- [] Create the data model in GraphQL
+    - [] Entrys
+    - [] Entitys
+    - [] Collections
 - [] Create an API
 - [] Create mockups of some of the screens
 - [] Create a storybook for the components

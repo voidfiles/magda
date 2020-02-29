@@ -1,3 +1,4 @@
 _workdir
 .env
 service_account_key.json
+*firebase-debug.log
