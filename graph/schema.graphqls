@@ -1,56 +1,130 @@
-enum EntryKind {
-    quote
-    image
+scalar Time
+scalar URL 
+
+"""
+A source file is something that was, or will be, copied into the system. It's used to document provenance.
+
+It has one property which is a url which should be a URL the user can use to download the bytes from. The URLs are time sensitve.
+"""
+type SourceFile {
+  id: ID!
+  """url is a link to a canonical file"""
+  url: URL!
+  """content_type is a guess at the files content_type"""
+  contentType: String!
 }
 
-scalar Time
+enum WebsiteKind {
+  """site is the default website value"""
+  site
+  wikimedia
+  artnet
+  artsy
+  """homepage is for the main online presence of an entity"""
+  homepage
+}
 
-type Entry {
+"""
+A website represents a page on the world wide web. It's rich text and a jumping off place for more information about something.
+
+Websites are notoriously temporary. The goal should be to hook into some kind of persistent identifier scheme.
+
+But, they are a nescesity. Things like homepages, and blogs of artists however temporary are important, but should be kept up to date.
+"""
+type Website {
   id: ID!
-  kind: EntryKind!
-  source: Source!
-  titles: [String!]!
-  files: [File!]!
+  url: URL!
+  kind: WebsiteKind!
+  title: String
   description: String
-  creators: [Entity!]!
-  published_at: Time!
-  created_at: Time!
-  updated_at: Time!
+  createdAt: Time!
+  updatedAt: Time!
+}
+
+"""
+A file is a blob of bytes.
+"""
+interface File {
+  id: ID!
+  """
+  A URL where the user can download the bytes from. These URLs are timesensitve.
+  """
+  url: URL!
+  """
+  The content type of the bytes
+  """
+  contentType: String!
+  """
+  A suggested name for this blob of bytes on disk.
+  """
+  fileName: String
+  createdOn: Time!
+}
+
+type Dimensions {
+  width: Int
+  height: Int
+}
+
+"""
+An image is a file that you can display to a user.
+"""
+type Image implements File {
+  id: ID!
+  """
+  A URL where the user can download the bytes from. These URLs are timesensitve.
+  """
+  url: URL!
+  """
+  The content type of the bytes
+  """
+  contentType: String!
+  """
+  A suggested name for this blob of bytes on disk.
+  """
+  fileName: String
+  createdOn: Time!
+  dimensions: Dimensions!
+}
+
+"""
+An entity represents an Active thing ie a  person or organization.
+"""
+type Entity {
+    id: ID!
+    name: String!
+    description: String
+    websites: [Website!]!
+    images: [Image!]!
+    createdAt: Time!
+    updatedAt: Time!
 }
 
 type Source {
-  entity: Entity!
-  url: String
-  titles: [String!]!
+  page: Website!
+  site: Website!
+  entity: Entity
 }
 
-type File {
-    id: ID!
-    path: String!
-    sourceUrl: String
-    contentType: String!
-    filename: String!
-    width: Int
-    height: Int
-    createdAt: Time!
-    updatedAt: Time!
+type ImageEntry {
+  id: ID!
+  title: String!
+  description: String
+  image: Image
+  source: Source!
+  creators: [Entity!]!
 }
 
-enum EntityKind {
-    person
-    organization
+type TextEntry {
+  id: ID!
+  text: String!
+  image: Image
+  source: Source!
+  creators: [Entity!]!
 }
 
-type Entity {
-    id: ID!
-    kind: EntityKind!
-    names: [String!]!
-    urls: [String!]!
-    description: String
-    createdAt: Time!
-    updatedAt: Time!
-    files: [File!]!
-}
+union Entry = TextEntry | ImageEntry
+
 
 type Query {
   getEntry(id: ID!): Entry!

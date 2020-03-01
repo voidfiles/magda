@@ -20,6 +20,8 @@ setup:
 	GOBIN=$(BINDIR) go install github.com/99designs/gqlgen
 	GOBIN=$(BINDIR) go install golang.org/x/lint/golint
 	
+generate:
+	go run github.com/99designs/gqlgen generate
 
 server:
 	go run main.go

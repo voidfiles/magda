@@ -9,126 +9,144 @@ import (
 	"time"
 )
 
+type Entry interface {
+	IsEntry()
+}
+
+// A file is a blob of bytes.
+type File interface {
+	IsFile()
+}
+
+type Dimensions struct {
+	Width  *int `json:"width"`
+	Height *int `json:"height"`
+}
+
+// An entity represents an Active thing ie a  person or organization.
 type Entity struct {
 	ID          string     `json:"id"`
-	Kind        EntityKind `json:"kind"`
-	Names       []string   `json:"names"`
-	Urls        []string   `json:"urls"`
+	Name        string     `json:"name"`
 	Description *string    `json:"description"`
+	Websites    []*Website `json:"websites"`
+	Images      []*Image   `json:"images"`
 	CreatedAt   time.Time  `json:"createdAt"`
 	UpdatedAt   time.Time  `json:"updatedAt"`
-	Files       []*File    `json:"files"`
 }
 
-type Entry struct {
+// An image is a file that you can display to a user.
+type Image struct {
+	ID string `json:"id"`
+	// A URL where the user can download the bytes from. These URLs are timesensitve.
+	URL string `json:"url"`
+	// The content type of the bytes
+	ContentType string `json:"contentType"`
+	// A suggested name for this blob of bytes on disk.
+	FileName   *string     `json:"fileName"`
+	CreatedOn  time.Time   `json:"createdOn"`
+	Dimensions *Dimensions `json:"dimensions"`
+}
+
+func (Image) IsFile() {}
+
+type ImageEntry struct {
 	ID          string    `json:"id"`
-	Kind        EntryKind `json:"kind"`
-	Source      *Source   `json:"source"`
-	Titles      []string  `json:"titles"`
-	Files       []*File   `json:"files"`
+	Title       string    `json:"title"`
 	Description *string   `json:"description"`
+	Image       *Image    `json:"image"`
+	Source      *Source   `json:"source"`
 	Creators    []*Entity `json:"creators"`
-	PublishedAt time.Time `json:"published_at"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
 }
 
-type File struct {
-	ID          string    `json:"id"`
-	Path        string    `json:"path"`
-	SourceURL   *string   `json:"sourceUrl"`
-	ContentType string    `json:"contentType"`
-	Filename    string    `json:"filename"`
-	Width       *int      `json:"width"`
-	Height      *int      `json:"height"`
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
-}
+func (ImageEntry) IsEntry() {}
 
 type Source struct {
+	Page   *Website `json:"page"`
+	Site   *Website `json:"site"`
 	Entity *Entity  `json:"entity"`
-	URL    *string  `json:"url"`
-	Titles []string `json:"titles"`
 }
 
-type EntityKind string
+// A source file is something that was, or will be, copied into the system. It's used to document provenance.
+//
+// It has one property which is a url which should be a URL the user can use to download the bytes from. The URLs are time sensitve.
+type SourceFile struct {
+	ID string `json:"id"`
+	// url is a link to a canonical file
+	URL string `json:"url"`
+	// content_type is a guess at the files content_type
+	ContentType string `json:"contentType"`
+}
+
+type TextEntry struct {
+	ID       string    `json:"id"`
+	Text     string    `json:"text"`
+	Image    *Image    `json:"image"`
+	Source   *Source   `json:"source"`
+	Creators []*Entity `json:"creators"`
+}
+
+func (TextEntry) IsEntry() {}
+
+// A website represents a page on the world wide web. It's rich text and a jumping off place for more information about something.
+//
+// Websites are notoriously temporary. The goal should be to hook into some kind of persistent identifier scheme.
+//
+// But, they are a nescesity. Things like homepages, and blogs of artists however temporary are important, but should be kept up to date.
+type Website struct {
+	ID          string      `json:"id"`
+	URL         string      `json:"url"`
+	Kind        WebsiteKind `json:"kind"`
+	Title       *string     `json:"title"`
+	Description *string     `json:"description"`
+	CreatedAt   time.Time   `json:"createdAt"`
+	UpdatedAt   time.Time   `json:"updatedAt"`
+}
+
+type WebsiteKind string
 
 const (
-	EntityKindPerson       EntityKind = "person"
-	EntityKindOrganization EntityKind = "organization"
+	// site is the default website value
+	WebsiteKindSite      WebsiteKind = "site"
+	WebsiteKindWikimedia WebsiteKind = "wikimedia"
+	WebsiteKindArtnet    WebsiteKind = "artnet"
+	WebsiteKindArtsy     WebsiteKind = "artsy"
+	// homepage is for the main online presence of an entity
+	WebsiteKindHomepage WebsiteKind = "homepage"
 )
 
-var AllEntityKind = []EntityKind{
-	EntityKindPerson,
-	EntityKindOrganization,
+var AllWebsiteKind = []WebsiteKind{
+	WebsiteKindSite,
+	WebsiteKindWikimedia,
+	WebsiteKindArtnet,
+	WebsiteKindArtsy,
+	WebsiteKindHomepage,
 }
 
-func (e EntityKind) IsValid() bool {
+func (e WebsiteKind) IsValid() bool {
 	switch e {
-	case EntityKindPerson, EntityKindOrganization:
+	case WebsiteKindSite, WebsiteKindWikimedia, WebsiteKindArtnet, WebsiteKindArtsy, WebsiteKindHomepage:
 		return true
 	}
 	return false
 }
 
-func (e EntityKind) String() string {
+func (e WebsiteKind) String() string {
 	return string(e)
 }
 
-func (e *EntityKind) UnmarshalGQL(v interface{}) error {
+func (e *WebsiteKind) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = EntityKind(str)
+	*e = WebsiteKind(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid EntityKind", str)
+		return fmt.Errorf("%s is not a valid WebsiteKind", str)
 	}
 	return nil
 }
 
-func (e EntityKind) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-type EntryKind string
-
-const (
-	EntryKindQuote EntryKind = "quote"
-	EntryKindImage EntryKind = "image"
-)
-
-var AllEntryKind = []EntryKind{
-	EntryKindQuote,
-	EntryKindImage,
-}
-
-func (e EntryKind) IsValid() bool {
-	switch e {
-	case EntryKindQuote, EntryKindImage:
-		return true
-	}
-	return false
-}
-
-func (e EntryKind) String() string {
-	return string(e)
-}
-
-func (e *EntryKind) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = EntryKind(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid EntryKind", str)
-	}
-	return nil
-}
-
-func (e EntryKind) MarshalGQL(w io.Writer) {
+func (e WebsiteKind) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }

@@ -10,7 +10,7 @@ import (
 	"github.com/voidfiles/magda/graph/model"
 )
 
-func (r *queryResolver) GetEntry(ctx context.Context, id string) (*model.Entry, error) {
+func (r *queryResolver) GetEntry(ctx context.Context, id string) (model.Entry, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 

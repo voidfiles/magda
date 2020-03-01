@@ -77,6 +77,7 @@ You can run the webapp via `make run`
     - [] Only allow admins right now to make any changes
     - [] Require authentication for all reads, use anonymous for folks who haven't signed up
 - [] Create the data model in GraphQL
+    - [x] Some initial model work
     - [] Entrys
     - [] Entitys
     - [] Collections
@@ -88,3 +89,88 @@ You can run the webapp via `make run`
         - [] Viewer (possibly anonymous), can look at collections
         - [] User (Can add things to the system that belong to them)
         - [] Admin (Can do anything )
+
+
+# Examples of data
+
+## Art
+
+Art is often found browsing the web, or while reading feeds. Based on some signal from a user, the page can be broken down into a set of the following bits of data. Note there is very little data here. It will require human curation at a later date to transform this raw entry into a fully detailed one.
+
+Raw
+
+Shape
+
+```
+source:
+  page: Website
+  image: SourceFile
+```
+
+```yaml
+source:
+  page:
+    url: https://la-beaute--de-pandore.tumblr.com/post/190039691507/loretta-lux
+    title: "La Beauté de Pandore — Loretta Lux"
+    description: ""
+  image:
+    found_url: https://66.media.tumblr.com/e33bd2baf3bd7fcc98c8044c951315b3/1052e56105e7b734-99/s1280x1920/4d8bee72d5b3ef070d600bd39187bdf00e3eaab7.jpg
+    dimensions:
+      width: 800
+      height: 585
+```
+
+Full
+
+```yaml
+source:
+  page:
+    url: https://la-beaute--de-pandore.tumblr.com/post/190039691507/loretta-lux
+    title: "La Beauté de Pandore — Loretta Lux"
+    description: ""
+  site:
+    url: https://la-beaute--de-pandore.tumblr.com/
+    title: "La Beauté de Pandore"
+    description: ""
+item:
+  type: "image"
+  found_url: https://66.media.tumblr.com/e33bd2baf3bd7fcc98c8044c951315b3/1052e56105e7b734-99/s1280x1920/4d8bee72d5b3ef070d600bd39187bdf00e3eaab7.jpg
+  dimensions:
+    width: 800
+    height: 585
+creators:
+  - name: "Loretta Lux"
+    image: ""
+    description: ""
+    urls:
+      - url: http://lorettalux.de/
+        type: homepage
+      - url: http://www.artnet.com/artists/loretta-lux/
+        type: artnet
+      - url: https://en.wikipedia.org/wiki/Loretta_Lux
+        type: wikipedia
+      - url: https://www.artsy.net/artist/loretta-lux
+        type: artsy
+```
+
+## Quote
+
+Quotes unlike art would require detailed entry in the first place. It's difficult to automatically curate a quote.
+
+```yaml
+source:
+  page:
+    url: https://www.cs.yale.edu/homes/perlis-alan/quotes.html
+    title: "Perlisisms - "Epigrams in Programming" by Alan J. Perlis"
+    description: ""
+item:
+  type: "quote"
+  content:
+    text: "One man's constant is another man's variable."
+creators:
+  - name: "Alan J. Perlis"
+    description: ""
+    urls:
+      - url: https://en.wikipedia.org/wiki/Alan_Perlis
+        type: wikipedia
+```

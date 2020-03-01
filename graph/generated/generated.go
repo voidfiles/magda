@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -43,40 +44,37 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	Dimensions struct {
+		Height func(childComplexity int) int
+		Width  func(childComplexity int) int
+	}
+
 	Entity struct {
 		CreatedAt   func(childComplexity int) int
 		Description func(childComplexity int) int
-		Files       func(childComplexity int) int
 		ID          func(childComplexity int) int
-		Kind        func(childComplexity int) int
-		Names       func(childComplexity int) int
+		Images      func(childComplexity int) int
+		Name        func(childComplexity int) int
 		UpdatedAt   func(childComplexity int) int
-		Urls        func(childComplexity int) int
+		Websites    func(childComplexity int) int
 	}
 
-	Entry struct {
-		CreatedAt   func(childComplexity int) int
+	Image struct {
+		ContentType func(childComplexity int) int
+		CreatedOn   func(childComplexity int) int
+		Dimensions  func(childComplexity int) int
+		FileName    func(childComplexity int) int
+		ID          func(childComplexity int) int
+		URL         func(childComplexity int) int
+	}
+
+	ImageEntry struct {
 		Creators    func(childComplexity int) int
 		Description func(childComplexity int) int
-		Files       func(childComplexity int) int
 		ID          func(childComplexity int) int
-		Kind        func(childComplexity int) int
-		PublishedAt func(childComplexity int) int
+		Image       func(childComplexity int) int
 		Source      func(childComplexity int) int
-		Titles      func(childComplexity int) int
-		UpdatedAt   func(childComplexity int) int
-	}
-
-	File struct {
-		ContentType func(childComplexity int) int
-		CreatedAt   func(childComplexity int) int
-		Filename    func(childComplexity int) int
-		Height      func(childComplexity int) int
-		ID          func(childComplexity int) int
-		Path        func(childComplexity int) int
-		SourceURL   func(childComplexity int) int
-		UpdatedAt   func(childComplexity int) int
-		Width       func(childComplexity int) int
+		Title       func(childComplexity int) int
 	}
 
 	Query struct {
@@ -85,13 +83,37 @@ type ComplexityRoot struct {
 
 	Source struct {
 		Entity func(childComplexity int) int
-		Titles func(childComplexity int) int
-		URL    func(childComplexity int) int
+		Page   func(childComplexity int) int
+		Site   func(childComplexity int) int
+	}
+
+	SourceFile struct {
+		ContentType func(childComplexity int) int
+		ID          func(childComplexity int) int
+		URL         func(childComplexity int) int
+	}
+
+	TextEntry struct {
+		Creators func(childComplexity int) int
+		ID       func(childComplexity int) int
+		Image    func(childComplexity int) int
+		Source   func(childComplexity int) int
+		Text     func(childComplexity int) int
+	}
+
+	Website struct {
+		CreatedAt   func(childComplexity int) int
+		Description func(childComplexity int) int
+		ID          func(childComplexity int) int
+		Kind        func(childComplexity int) int
+		Title       func(childComplexity int) int
+		URL         func(childComplexity int) int
+		UpdatedAt   func(childComplexity int) int
 	}
 }
 
 type QueryResolver interface {
-	GetEntry(ctx context.Context, id string) (*model.Entry, error)
+	GetEntry(ctx context.Context, id string) (model.Entry, error)
 }
 
 type executableSchema struct {
@@ -109,6 +131,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
+	case "Dimensions.height":
+		if e.complexity.Dimensions.Height == nil {
+			break
+		}
+
+		return e.complexity.Dimensions.Height(childComplexity), true
+
+	case "Dimensions.width":
+		if e.complexity.Dimensions.Width == nil {
+			break
+		}
+
+		return e.complexity.Dimensions.Width(childComplexity), true
+
 	case "Entity.createdAt":
 		if e.complexity.Entity.CreatedAt == nil {
 			break
@@ -123,13 +159,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Entity.Description(childComplexity), true
 
-	case "Entity.files":
-		if e.complexity.Entity.Files == nil {
-			break
-		}
-
-		return e.complexity.Entity.Files(childComplexity), true
-
 	case "Entity.id":
 		if e.complexity.Entity.ID == nil {
 			break
@@ -137,19 +166,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Entity.ID(childComplexity), true
 
-	case "Entity.kind":
-		if e.complexity.Entity.Kind == nil {
+	case "Entity.images":
+		if e.complexity.Entity.Images == nil {
 			break
 		}
 
-		return e.complexity.Entity.Kind(childComplexity), true
+		return e.complexity.Entity.Images(childComplexity), true
 
-	case "Entity.names":
-		if e.complexity.Entity.Names == nil {
+	case "Entity.name":
+		if e.complexity.Entity.Name == nil {
 			break
 		}
 
-		return e.complexity.Entity.Names(childComplexity), true
+		return e.complexity.Entity.Name(childComplexity), true
 
 	case "Entity.updatedAt":
 		if e.complexity.Entity.UpdatedAt == nil {
@@ -158,145 +187,96 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Entity.UpdatedAt(childComplexity), true
 
-	case "Entity.urls":
-		if e.complexity.Entity.Urls == nil {
+	case "Entity.websites":
+		if e.complexity.Entity.Websites == nil {
 			break
 		}
 
-		return e.complexity.Entity.Urls(childComplexity), true
+		return e.complexity.Entity.Websites(childComplexity), true
 
-	case "Entry.created_at":
-		if e.complexity.Entry.CreatedAt == nil {
+	case "Image.contentType":
+		if e.complexity.Image.ContentType == nil {
 			break
 		}
 
-		return e.complexity.Entry.CreatedAt(childComplexity), true
+		return e.complexity.Image.ContentType(childComplexity), true
 
-	case "Entry.creators":
-		if e.complexity.Entry.Creators == nil {
+	case "Image.createdOn":
+		if e.complexity.Image.CreatedOn == nil {
 			break
 		}
 
-		return e.complexity.Entry.Creators(childComplexity), true
+		return e.complexity.Image.CreatedOn(childComplexity), true
 
-	case "Entry.description":
-		if e.complexity.Entry.Description == nil {
+	case "Image.dimensions":
+		if e.complexity.Image.Dimensions == nil {
 			break
 		}
 
-		return e.complexity.Entry.Description(childComplexity), true
+		return e.complexity.Image.Dimensions(childComplexity), true
 
-	case "Entry.files":
-		if e.complexity.Entry.Files == nil {
+	case "Image.fileName":
+		if e.complexity.Image.FileName == nil {
 			break
 		}
 
-		return e.complexity.Entry.Files(childComplexity), true
+		return e.complexity.Image.FileName(childComplexity), true
 
-	case "Entry.id":
-		if e.complexity.Entry.ID == nil {
+	case "Image.id":
+		if e.complexity.Image.ID == nil {
 			break
 		}
 
-		return e.complexity.Entry.ID(childComplexity), true
+		return e.complexity.Image.ID(childComplexity), true
 
-	case "Entry.kind":
-		if e.complexity.Entry.Kind == nil {
+	case "Image.url":
+		if e.complexity.Image.URL == nil {
 			break
 		}
 
-		return e.complexity.Entry.Kind(childComplexity), true
+		return e.complexity.Image.URL(childComplexity), true
 
-	case "Entry.published_at":
-		if e.complexity.Entry.PublishedAt == nil {
+	case "ImageEntry.creators":
+		if e.complexity.ImageEntry.Creators == nil {
 			break
 		}
 
-		return e.complexity.Entry.PublishedAt(childComplexity), true
+		return e.complexity.ImageEntry.Creators(childComplexity), true
 
-	case "Entry.source":
-		if e.complexity.Entry.Source == nil {
+	case "ImageEntry.description":
+		if e.complexity.ImageEntry.Description == nil {
 			break
 		}
 
-		return e.complexity.Entry.Source(childComplexity), true
+		return e.complexity.ImageEntry.Description(childComplexity), true
 
-	case "Entry.titles":
-		if e.complexity.Entry.Titles == nil {
+	case "ImageEntry.id":
+		if e.complexity.ImageEntry.ID == nil {
 			break
 		}
 
-		return e.complexity.Entry.Titles(childComplexity), true
+		return e.complexity.ImageEntry.ID(childComplexity), true
 
-	case "Entry.updated_at":
-		if e.complexity.Entry.UpdatedAt == nil {
+	case "ImageEntry.image":
+		if e.complexity.ImageEntry.Image == nil {
 			break
 		}
 
-		return e.complexity.Entry.UpdatedAt(childComplexity), true
+		return e.complexity.ImageEntry.Image(childComplexity), true
 
-	case "File.contentType":
-		if e.complexity.File.ContentType == nil {
+	case "ImageEntry.source":
+		if e.complexity.ImageEntry.Source == nil {
 			break
 		}
 
-		return e.complexity.File.ContentType(childComplexity), true
+		return e.complexity.ImageEntry.Source(childComplexity), true
 
-	case "File.createdAt":
-		if e.complexity.File.CreatedAt == nil {
+	case "ImageEntry.title":
+		if e.complexity.ImageEntry.Title == nil {
 			break
 		}
 
-		return e.complexity.File.CreatedAt(childComplexity), true
-
-	case "File.filename":
-		if e.complexity.File.Filename == nil {
-			break
-		}
-
-		return e.complexity.File.Filename(childComplexity), true
-
-	case "File.height":
-		if e.complexity.File.Height == nil {
-			break
-		}
-
-		return e.complexity.File.Height(childComplexity), true
-
-	case "File.id":
-		if e.complexity.File.ID == nil {
-			break
-		}
-
-		return e.complexity.File.ID(childComplexity), true
-
-	case "File.path":
-		if e.complexity.File.Path == nil {
-			break
-		}
-
-		return e.complexity.File.Path(childComplexity), true
-
-	case "File.sourceUrl":
-		if e.complexity.File.SourceURL == nil {
-			break
-		}
-
-		return e.complexity.File.SourceURL(childComplexity), true
-
-	case "File.updatedAt":
-		if e.complexity.File.UpdatedAt == nil {
-			break
-		}
-
-		return e.complexity.File.UpdatedAt(childComplexity), true
-
-	case "File.width":
-		if e.complexity.File.Width == nil {
-			break
-		}
-
-		return e.complexity.File.Width(childComplexity), true
+		return e.complexity.ImageEntry.Title(childComplexity), true
 
 	case "Query.getEntry":
 		if e.complexity.Query.GetEntry == nil {
@@ -317,19 +297,124 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Source.Entity(childComplexity), true
 
-	case "Source.titles":
-		if e.complexity.Source.Titles == nil {
+	case "Source.page":
+		if e.complexity.Source.Page == nil {
 			break
 		}
 
-		return e.complexity.Source.Titles(childComplexity), true
+		return e.complexity.Source.Page(childComplexity), true
 
-	case "Source.url":
-		if e.complexity.Source.URL == nil {
+	case "Source.site":
+		if e.complexity.Source.Site == nil {
 			break
 		}
 
-		return e.complexity.Source.URL(childComplexity), true
+		return e.complexity.Source.Site(childComplexity), true
+
+	case "SourceFile.contentType":
+		if e.complexity.SourceFile.ContentType == nil {
+			break
+		}
+
+		return e.complexity.SourceFile.ContentType(childComplexity), true
+
+	case "SourceFile.id":
+		if e.complexity.SourceFile.ID == nil {
+			break
+		}
+
+		return e.complexity.SourceFile.ID(childComplexity), true
+
+	case "SourceFile.url":
+		if e.complexity.SourceFile.URL == nil {
+			break
+		}
+
+		return e.complexity.SourceFile.URL(childComplexity), true
+
+	case "TextEntry.creators":
+		if e.complexity.TextEntry.Creators == nil {
+			break
+		}
+
+		return e.complexity.TextEntry.Creators(childComplexity), true
+
+	case "TextEntry.id":
+		if e.complexity.TextEntry.ID == nil {
+			break
+		}
+
+		return e.complexity.TextEntry.ID(childComplexity), true
+
+	case "TextEntry.image":
+		if e.complexity.TextEntry.Image == nil {
+			break
+		}
+
+		return e.complexity.TextEntry.Image(childComplexity), true
+
+	case "TextEntry.source":
+		if e.complexity.TextEntry.Source == nil {
+			break
+		}
+
+		return e.complexity.TextEntry.Source(childComplexity), true
+
+	case "TextEntry.text":
+		if e.complexity.TextEntry.Text == nil {
+			break
+		}
+
+		return e.complexity.TextEntry.Text(childComplexity), true
+
+	case "Website.createdAt":
+		if e.complexity.Website.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.Website.CreatedAt(childComplexity), true
+
+	case "Website.description":
+		if e.complexity.Website.Description == nil {
+			break
+		}
+
+		return e.complexity.Website.Description(childComplexity), true
+
+	case "Website.id":
+		if e.complexity.Website.ID == nil {
+			break
+		}
+
+		return e.complexity.Website.ID(childComplexity), true
+
+	case "Website.kind":
+		if e.complexity.Website.Kind == nil {
+			break
+		}
+
+		return e.complexity.Website.Kind(childComplexity), true
+
+	case "Website.title":
+		if e.complexity.Website.Title == nil {
+			break
+		}
+
+		return e.complexity.Website.Title(childComplexity), true
+
+	case "Website.url":
+		if e.complexity.Website.URL == nil {
+			break
+		}
+
+		return e.complexity.Website.URL(childComplexity), true
+
+	case "Website.updatedAt":
+		if e.complexity.Website.UpdatedAt == nil {
+			break
+		}
+
+		return e.complexity.Website.UpdatedAt(childComplexity), true
 
 	}
 	return 0, false
@@ -381,59 +466,133 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	&ast.Source{Name: "graph/schema.graphqls", Input: `enum EntryKind {
-    quote
-    image
+	&ast.Source{Name: "graph/schema.graphqls", Input: `scalar Time
+scalar URL 
+
+"""
+A source file is something that was, or will be, copied into the system. It's used to document provenance.
+
+It has one property which is a url which should be a URL the user can use to download the bytes from. The URLs are time sensitve.
+"""
+type SourceFile {
+  id: ID!
+  """url is a link to a canonical file"""
+  url: URL!
+  """content_type is a guess at the files content_type"""
+  contentType: String!
 }
 
-scalar Time
+enum WebsiteKind {
+  """site is the default website value"""
+  site
+  wikimedia
+  artnet
+  artsy
+  """homepage is for the main online presence of an entity"""
+  homepage
+}
 
-type Entry {
+"""
+A website represents a page on the world wide web. It's rich text and a jumping off place for more information about something.
+
+Websites are notoriously temporary. The goal should be to hook into some kind of persistent identifier scheme.
+
+But, they are a nescesity. Things like homepages, and blogs of artists however temporary are important, but should be kept up to date.
+"""
+type Website {
   id: ID!
-  kind: EntryKind!
-  source: Source!
-  titles: [String!]!
-  files: [File!]!
+  url: URL!
+  kind: WebsiteKind!
+  title: String
   description: String
-  creators: [Entity!]!
-  published_at: Time!
-  created_at: Time!
-  updated_at: Time!
+  createdAt: Time!
+  updatedAt: Time!
+}
+
+"""
+A file is a blob of bytes.
+"""
+interface File {
+  id: ID!
+  """
+  A URL where the user can download the bytes from. These URLs are timesensitve.
+  """
+  url: URL!
+  """
+  The content type of the bytes
+  """
+  contentType: String!
+  """
+  A suggested name for this blob of bytes on disk.
+  """
+  fileName: String
+  createdOn: Time!
+}
+
+type Dimensions {
+  width: Int
+  height: Int
+}
+
+"""
+An image is a file that you can display to a user.
+"""
+type Image implements File {
+  id: ID!
+  """
+  A URL where the user can download the bytes from. These URLs are timesensitve.
+  """
+  url: URL!
+  """
+  The content type of the bytes
+  """
+  contentType: String!
+  """
+  A suggested name for this blob of bytes on disk.
+  """
+  fileName: String
+  createdOn: Time!
+  dimensions: Dimensions!
+}
+
+"""
+An entity represents an Active thing ie a  person or organization.
+"""
+type Entity {
+    id: ID!
+    name: String!
+    description: String
+    websites: [Website!]!
+    images: [Image!]!
+    createdAt: Time!
+    updatedAt: Time!
 }
 
 type Source {
-  entity: Entity!
-  url: String
-  titles: [String!]!
+  page: Website!
+  site: Website!
+  entity: Entity
 }
 
-type File {
-    id: ID!
-    path: String!
-    sourceUrl: String
-    contentType: String!
-    filename: String!
-    width: Int
-    height: Int
-    createdAt: Time!
-    updatedAt: Time!
+type ImageEntry {
+  id: ID!
+  title: String!
+  description: String
+  image: Image
+  source: Source!
+  creators: [Entity!]!
 }
 
-enum EntityKind {
-    person
-    organization
+type TextEntry {
+  id: ID!
+  text: String!
+  image: Image
+  source: Source!
+  creators: [Entity!]!
 }
 
-type Entity {
-    id: ID!
-    kind: EntityKind!
-    names: [String!]!
-    urls: [String!]!
-    description: String
-    createdAt: Time!
-    updatedAt: Time!
-    files: [File!]!
-}
+union Entry = TextEntry | ImageEntry
+
 
 type Query {
   getEntry(id: ID!): Entry!
@@ -509,6 +668,68 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
+func (ec *executionContext) _Dimensions_width(ctx context.Context, field graphql.CollectedField, obj *model.Dimensions) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Dimensions",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Width, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Dimensions_height(ctx context.Context, field graphql.CollectedField, obj *model.Dimensions) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Dimensions",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Height, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Entity_id(ctx context.Context, field graphql.CollectedField, obj *model.Entity) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -543,7 +764,7 @@ func (ec *executionContext) _Entity_id(ctx context.Context, field graphql.Collec
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Entity_kind(ctx context.Context, field graphql.CollectedField, obj *model.Entity) (ret graphql.Marshaler) {
+func (ec *executionContext) _Entity_name(ctx context.Context, field graphql.CollectedField, obj *model.Entity) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -560,7 +781,7 @@ func (ec *executionContext) _Entity_kind(ctx context.Context, field graphql.Coll
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Kind, nil
+		return obj.Name, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -572,77 +793,9 @@ func (ec *executionContext) _Entity_kind(ctx context.Context, field graphql.Coll
 		}
 		return graphql.Null
 	}
-	res := resTmp.(model.EntityKind)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNEntityKind2githubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐEntityKind(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Entity_names(ctx context.Context, field graphql.CollectedField, obj *model.Entity) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Entity",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Names, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]string)
-	fc.Result = res
-	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Entity_urls(ctx context.Context, field graphql.CollectedField, obj *model.Entity) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Entity",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Urls, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]string)
-	fc.Result = res
-	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Entity_description(ctx context.Context, field graphql.CollectedField, obj *model.Entity) (ret graphql.Marshaler) {
@@ -674,6 +827,74 @@ func (ec *executionContext) _Entity_description(ctx context.Context, field graph
 	res := resTmp.(*string)
 	fc.Result = res
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Entity_websites(ctx context.Context, field graphql.CollectedField, obj *model.Entity) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Entity",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Websites, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Website)
+	fc.Result = res
+	return ec.marshalNWebsite2ᚕᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐWebsiteᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Entity_images(ctx context.Context, field graphql.CollectedField, obj *model.Entity) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Entity",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Images, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Image)
+	fc.Result = res
+	return ec.marshalNImage2ᚕᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐImageᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Entity_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Entity) (ret graphql.Marshaler) {
@@ -744,7 +965,7 @@ func (ec *executionContext) _Entity_updatedAt(ctx context.Context, field graphql
 	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Entity_files(ctx context.Context, field graphql.CollectedField, obj *model.Entity) (ret graphql.Marshaler) {
+func (ec *executionContext) _Image_id(ctx context.Context, field graphql.CollectedField, obj *model.Image) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -752,41 +973,7 @@ func (ec *executionContext) _Entity_files(ctx context.Context, field graphql.Col
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:   "Entity",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Files, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.File)
-	fc.Result = res
-	return ec.marshalNFile2ᚕᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐFileᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Entry_id(ctx context.Context, field graphql.CollectedField, obj *model.Entry) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Entry",
+		Object:   "Image",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -812,7 +999,7 @@ func (ec *executionContext) _Entry_id(ctx context.Context, field graphql.Collect
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Entry_kind(ctx context.Context, field graphql.CollectedField, obj *model.Entry) (ret graphql.Marshaler) {
+func (ec *executionContext) _Image_url(ctx context.Context, field graphql.CollectedField, obj *model.Image) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -820,7 +1007,7 @@ func (ec *executionContext) _Entry_kind(ctx context.Context, field graphql.Colle
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:   "Entry",
+		Object:   "Image",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -829,310 +1016,7 @@ func (ec *executionContext) _Entry_kind(ctx context.Context, field graphql.Colle
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Kind, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(model.EntryKind)
-	fc.Result = res
-	return ec.marshalNEntryKind2githubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐEntryKind(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Entry_source(ctx context.Context, field graphql.CollectedField, obj *model.Entry) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Entry",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Source, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.Source)
-	fc.Result = res
-	return ec.marshalNSource2ᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐSource(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Entry_titles(ctx context.Context, field graphql.CollectedField, obj *model.Entry) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Entry",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Titles, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]string)
-	fc.Result = res
-	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Entry_files(ctx context.Context, field graphql.CollectedField, obj *model.Entry) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Entry",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Files, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.File)
-	fc.Result = res
-	return ec.marshalNFile2ᚕᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐFileᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Entry_description(ctx context.Context, field graphql.CollectedField, obj *model.Entry) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Entry",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Description, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Entry_creators(ctx context.Context, field graphql.CollectedField, obj *model.Entry) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Entry",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Creators, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.Entity)
-	fc.Result = res
-	return ec.marshalNEntity2ᚕᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐEntityᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Entry_published_at(ctx context.Context, field graphql.CollectedField, obj *model.Entry) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Entry",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PublishedAt, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(time.Time)
-	fc.Result = res
-	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Entry_created_at(ctx context.Context, field graphql.CollectedField, obj *model.Entry) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Entry",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.CreatedAt, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(time.Time)
-	fc.Result = res
-	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Entry_updated_at(ctx context.Context, field graphql.CollectedField, obj *model.Entry) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Entry",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.UpdatedAt, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(time.Time)
-	fc.Result = res
-	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _File_id(ctx context.Context, field graphql.CollectedField, obj *model.File) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "File",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
+		return obj.URL, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1146,10 +1030,10 @@ func (ec *executionContext) _File_id(ctx context.Context, field graphql.Collecte
 	}
 	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return ec.marshalNURL2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _File_path(ctx context.Context, field graphql.CollectedField, obj *model.File) (ret graphql.Marshaler) {
+func (ec *executionContext) _Image_contentType(ctx context.Context, field graphql.CollectedField, obj *model.Image) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1157,72 +1041,7 @@ func (ec *executionContext) _File_path(ctx context.Context, field graphql.Collec
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:   "File",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Path, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _File_sourceUrl(ctx context.Context, field graphql.CollectedField, obj *model.File) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "File",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.SourceURL, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _File_contentType(ctx context.Context, field graphql.CollectedField, obj *model.File) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "File",
+		Object:   "Image",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -1248,7 +1067,7 @@ func (ec *executionContext) _File_contentType(ctx context.Context, field graphql
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _File_filename(ctx context.Context, field graphql.CollectedField, obj *model.File) (ret graphql.Marshaler) {
+func (ec *executionContext) _Image_fileName(ctx context.Context, field graphql.CollectedField, obj *model.Image) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1256,7 +1075,7 @@ func (ec *executionContext) _File_filename(ctx context.Context, field graphql.Co
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:   "File",
+		Object:   "Image",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -1265,7 +1084,140 @@ func (ec *executionContext) _File_filename(ctx context.Context, field graphql.Co
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Filename, nil
+		return obj.FileName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Image_createdOn(ctx context.Context, field graphql.CollectedField, obj *model.Image) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Image",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedOn, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Image_dimensions(ctx context.Context, field graphql.CollectedField, obj *model.Image) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Image",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Dimensions, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Dimensions)
+	fc.Result = res
+	return ec.marshalNDimensions2ᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐDimensions(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ImageEntry_id(ctx context.Context, field graphql.CollectedField, obj *model.ImageEntry) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ImageEntry",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _ImageEntry_title(ctx context.Context, field graphql.CollectedField, obj *model.ImageEntry) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "ImageEntry",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Title, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1282,7 +1234,7 @@ func (ec *executionContext) _File_filename(ctx context.Context, field graphql.Co
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _File_width(ctx context.Context, field graphql.CollectedField, obj *model.File) (ret graphql.Marshaler) {
+func (ec *executionContext) _ImageEntry_description(ctx context.Context, field graphql.CollectedField, obj *model.ImageEntry) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1290,7 +1242,7 @@ func (ec *executionContext) _File_width(ctx context.Context, field graphql.Colle
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:   "File",
+		Object:   "ImageEntry",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -1299,7 +1251,7 @@ func (ec *executionContext) _File_width(ctx context.Context, field graphql.Colle
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Width, nil
+		return obj.Description, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1308,12 +1260,12 @@ func (ec *executionContext) _File_width(ctx context.Context, field graphql.Colle
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _File_height(ctx context.Context, field graphql.CollectedField, obj *model.File) (ret graphql.Marshaler) {
+func (ec *executionContext) _ImageEntry_image(ctx context.Context, field graphql.CollectedField, obj *model.ImageEntry) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1321,7 +1273,7 @@ func (ec *executionContext) _File_height(ctx context.Context, field graphql.Coll
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:   "File",
+		Object:   "ImageEntry",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -1330,7 +1282,7 @@ func (ec *executionContext) _File_height(ctx context.Context, field graphql.Coll
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Height, nil
+		return obj.Image, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1339,12 +1291,12 @@ func (ec *executionContext) _File_height(ctx context.Context, field graphql.Coll
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(*model.Image)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalOImage2ᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐImage(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _File_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.File) (ret graphql.Marshaler) {
+func (ec *executionContext) _ImageEntry_source(ctx context.Context, field graphql.CollectedField, obj *model.ImageEntry) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1352,7 +1304,7 @@ func (ec *executionContext) _File_createdAt(ctx context.Context, field graphql.C
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:   "File",
+		Object:   "ImageEntry",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -1361,7 +1313,7 @@ func (ec *executionContext) _File_createdAt(ctx context.Context, field graphql.C
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.CreatedAt, nil
+		return obj.Source, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1373,12 +1325,12 @@ func (ec *executionContext) _File_createdAt(ctx context.Context, field graphql.C
 		}
 		return graphql.Null
 	}
-	res := resTmp.(time.Time)
+	res := resTmp.(*model.Source)
 	fc.Result = res
-	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+	return ec.marshalNSource2ᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐSource(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _File_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.File) (ret graphql.Marshaler) {
+func (ec *executionContext) _ImageEntry_creators(ctx context.Context, field graphql.CollectedField, obj *model.ImageEntry) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1386,7 +1338,7 @@ func (ec *executionContext) _File_updatedAt(ctx context.Context, field graphql.C
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:   "File",
+		Object:   "ImageEntry",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -1395,7 +1347,7 @@ func (ec *executionContext) _File_updatedAt(ctx context.Context, field graphql.C
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.UpdatedAt, nil
+		return obj.Creators, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1407,9 +1359,9 @@ func (ec *executionContext) _File_updatedAt(ctx context.Context, field graphql.C
 		}
 		return graphql.Null
 	}
-	res := resTmp.(time.Time)
+	res := resTmp.([]*model.Entity)
 	fc.Result = res
-	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+	return ec.marshalNEntity2ᚕᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐEntityᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getEntry(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1448,9 +1400,9 @@ func (ec *executionContext) _Query_getEntry(ctx context.Context, field graphql.C
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Entry)
+	res := resTmp.(model.Entry)
 	fc.Result = res
-	return ec.marshalNEntry2ᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐEntry(ctx, field.Selections, res)
+	return ec.marshalNEntry2githubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐEntry(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1522,6 +1474,74 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Source_page(ctx context.Context, field graphql.CollectedField, obj *model.Source) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Source",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Page, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Website)
+	fc.Result = res
+	return ec.marshalNWebsite2ᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐWebsite(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Source_site(ctx context.Context, field graphql.CollectedField, obj *model.Source) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Source",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Site, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Website)
+	fc.Result = res
+	return ec.marshalNWebsite2ᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐWebsite(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Source_entity(ctx context.Context, field graphql.CollectedField, obj *model.Source) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1546,17 +1566,14 @@ func (ec *executionContext) _Source_entity(ctx context.Context, field graphql.Co
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.(*model.Entity)
 	fc.Result = res
-	return ec.marshalNEntity2ᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐEntity(ctx, field.Selections, res)
+	return ec.marshalOEntity2ᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐEntity(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Source_url(ctx context.Context, field graphql.CollectedField, obj *model.Source) (ret graphql.Marshaler) {
+func (ec *executionContext) _SourceFile_id(ctx context.Context, field graphql.CollectedField, obj *model.SourceFile) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1564,7 +1581,41 @@ func (ec *executionContext) _Source_url(ctx context.Context, field graphql.Colle
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:   "Source",
+		Object:   "SourceFile",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SourceFile_url(ctx context.Context, field graphql.CollectedField, obj *model.SourceFile) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "SourceFile",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -1580,14 +1631,17 @@ func (ec *executionContext) _Source_url(ctx context.Context, field graphql.Colle
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalNURL2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Source_titles(ctx context.Context, field graphql.CollectedField, obj *model.Source) (ret graphql.Marshaler) {
+func (ec *executionContext) _SourceFile_contentType(ctx context.Context, field graphql.CollectedField, obj *model.SourceFile) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1595,7 +1649,7 @@ func (ec *executionContext) _Source_titles(ctx context.Context, field graphql.Co
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:   "Source",
+		Object:   "SourceFile",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -1604,7 +1658,7 @@ func (ec *executionContext) _Source_titles(ctx context.Context, field graphql.Co
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Titles, nil
+		return obj.ContentType, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1616,9 +1670,408 @@ func (ec *executionContext) _Source_titles(ctx context.Context, field graphql.Co
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]string)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _TextEntry_id(ctx context.Context, field graphql.CollectedField, obj *model.TextEntry) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "TextEntry",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _TextEntry_text(ctx context.Context, field graphql.CollectedField, obj *model.TextEntry) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "TextEntry",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Text, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _TextEntry_image(ctx context.Context, field graphql.CollectedField, obj *model.TextEntry) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "TextEntry",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Image, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Image)
+	fc.Result = res
+	return ec.marshalOImage2ᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐImage(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _TextEntry_source(ctx context.Context, field graphql.CollectedField, obj *model.TextEntry) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "TextEntry",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Source, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Source)
+	fc.Result = res
+	return ec.marshalNSource2ᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐSource(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _TextEntry_creators(ctx context.Context, field graphql.CollectedField, obj *model.TextEntry) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "TextEntry",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Creators, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Entity)
+	fc.Result = res
+	return ec.marshalNEntity2ᚕᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐEntityᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Website_id(ctx context.Context, field graphql.CollectedField, obj *model.Website) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Website",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Website_url(ctx context.Context, field graphql.CollectedField, obj *model.Website) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Website",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.URL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNURL2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Website_kind(ctx context.Context, field graphql.CollectedField, obj *model.Website) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Website",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Kind, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.WebsiteKind)
+	fc.Result = res
+	return ec.marshalNWebsiteKind2githubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐWebsiteKind(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Website_title(ctx context.Context, field graphql.CollectedField, obj *model.Website) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Website",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Title, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Website_description(ctx context.Context, field graphql.CollectedField, obj *model.Website) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Website",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Description, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Website_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Website) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Website",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Website_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.Website) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Website",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -2680,9 +3133,74 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    ************************** interface.gotpl ***************************
 
+func (ec *executionContext) _Entry(ctx context.Context, sel ast.SelectionSet, obj model.Entry) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case model.TextEntry:
+		return ec._TextEntry(ctx, sel, &obj)
+	case *model.TextEntry:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._TextEntry(ctx, sel, obj)
+	case model.ImageEntry:
+		return ec._ImageEntry(ctx, sel, &obj)
+	case *model.ImageEntry:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._ImageEntry(ctx, sel, obj)
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
+
+func (ec *executionContext) _File(ctx context.Context, sel ast.SelectionSet, obj model.File) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case model.Image:
+		return ec._Image(ctx, sel, &obj)
+	case *model.Image:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Image(ctx, sel, obj)
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
+
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
+
+var dimensionsImplementors = []string{"Dimensions"}
+
+func (ec *executionContext) _Dimensions(ctx context.Context, sel ast.SelectionSet, obj *model.Dimensions) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, dimensionsImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Dimensions")
+		case "width":
+			out.Values[i] = ec._Dimensions_width(ctx, field, obj)
+		case "height":
+			out.Values[i] = ec._Dimensions_height(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
 
 var entityImplementors = []string{"Entity"}
 
@@ -2700,23 +3218,23 @@ func (ec *executionContext) _Entity(ctx context.Context, sel ast.SelectionSet, o
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "kind":
-			out.Values[i] = ec._Entity_kind(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "names":
-			out.Values[i] = ec._Entity_names(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "urls":
-			out.Values[i] = ec._Entity_urls(ctx, field, obj)
+		case "name":
+			out.Values[i] = ec._Entity_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "description":
 			out.Values[i] = ec._Entity_description(ctx, field, obj)
+		case "websites":
+			out.Values[i] = ec._Entity_websites(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "images":
+			out.Values[i] = ec._Entity_images(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "createdAt":
 			out.Values[i] = ec._Entity_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -2727,8 +3245,52 @@ func (ec *executionContext) _Entity(ctx context.Context, sel ast.SelectionSet, o
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "files":
-			out.Values[i] = ec._Entity_files(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var imageImplementors = []string{"Image", "File"}
+
+func (ec *executionContext) _Image(ctx context.Context, sel ast.SelectionSet, obj *model.Image) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, imageImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Image")
+		case "id":
+			out.Values[i] = ec._Image_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "url":
+			out.Values[i] = ec._Image_url(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "contentType":
+			out.Values[i] = ec._Image_contentType(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "fileName":
+			out.Values[i] = ec._Image_fileName(ctx, field, obj)
+		case "createdOn":
+			out.Values[i] = ec._Image_createdOn(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "dimensions":
+			out.Values[i] = ec._Image_dimensions(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2743,119 +3305,38 @@ func (ec *executionContext) _Entity(ctx context.Context, sel ast.SelectionSet, o
 	return out
 }
 
-var entryImplementors = []string{"Entry"}
+var imageEntryImplementors = []string{"ImageEntry", "Entry"}
 
-func (ec *executionContext) _Entry(ctx context.Context, sel ast.SelectionSet, obj *model.Entry) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, entryImplementors)
+func (ec *executionContext) _ImageEntry(ctx context.Context, sel ast.SelectionSet, obj *model.ImageEntry) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, imageEntryImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("Entry")
+			out.Values[i] = graphql.MarshalString("ImageEntry")
 		case "id":
-			out.Values[i] = ec._Entry_id(ctx, field, obj)
+			out.Values[i] = ec._ImageEntry_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "kind":
-			out.Values[i] = ec._Entry_kind(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "source":
-			out.Values[i] = ec._Entry_source(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "titles":
-			out.Values[i] = ec._Entry_titles(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "files":
-			out.Values[i] = ec._Entry_files(ctx, field, obj)
+		case "title":
+			out.Values[i] = ec._ImageEntry_title(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "description":
-			out.Values[i] = ec._Entry_description(ctx, field, obj)
+			out.Values[i] = ec._ImageEntry_description(ctx, field, obj)
+		case "image":
+			out.Values[i] = ec._ImageEntry_image(ctx, field, obj)
+		case "source":
+			out.Values[i] = ec._ImageEntry_source(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "creators":
-			out.Values[i] = ec._Entry_creators(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "published_at":
-			out.Values[i] = ec._Entry_published_at(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "created_at":
-			out.Values[i] = ec._Entry_created_at(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "updated_at":
-			out.Values[i] = ec._Entry_updated_at(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var fileImplementors = []string{"File"}
-
-func (ec *executionContext) _File(ctx context.Context, sel ast.SelectionSet, obj *model.File) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, fileImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("File")
-		case "id":
-			out.Values[i] = ec._File_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "path":
-			out.Values[i] = ec._File_path(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "sourceUrl":
-			out.Values[i] = ec._File_sourceUrl(ctx, field, obj)
-		case "contentType":
-			out.Values[i] = ec._File_contentType(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "filename":
-			out.Values[i] = ec._File_filename(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "width":
-			out.Values[i] = ec._File_width(ctx, field, obj)
-		case "height":
-			out.Values[i] = ec._File_height(ctx, field, obj)
-		case "createdAt":
-			out.Values[i] = ec._File_createdAt(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "updatedAt":
-			out.Values[i] = ec._File_updatedAt(ctx, field, obj)
+			out.Values[i] = ec._ImageEntry_creators(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2925,15 +3406,147 @@ func (ec *executionContext) _Source(ctx context.Context, sel ast.SelectionSet, o
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Source")
+		case "page":
+			out.Values[i] = ec._Source_page(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "site":
+			out.Values[i] = ec._Source_site(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "entity":
 			out.Values[i] = ec._Source_entity(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var sourceFileImplementors = []string{"SourceFile"}
+
+func (ec *executionContext) _SourceFile(ctx context.Context, sel ast.SelectionSet, obj *model.SourceFile) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, sourceFileImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("SourceFile")
+		case "id":
+			out.Values[i] = ec._SourceFile_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "url":
-			out.Values[i] = ec._Source_url(ctx, field, obj)
-		case "titles":
-			out.Values[i] = ec._Source_titles(ctx, field, obj)
+			out.Values[i] = ec._SourceFile_url(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "contentType":
+			out.Values[i] = ec._SourceFile_contentType(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var textEntryImplementors = []string{"TextEntry", "Entry"}
+
+func (ec *executionContext) _TextEntry(ctx context.Context, sel ast.SelectionSet, obj *model.TextEntry) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, textEntryImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TextEntry")
+		case "id":
+			out.Values[i] = ec._TextEntry_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "text":
+			out.Values[i] = ec._TextEntry_text(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "image":
+			out.Values[i] = ec._TextEntry_image(ctx, field, obj)
+		case "source":
+			out.Values[i] = ec._TextEntry_source(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "creators":
+			out.Values[i] = ec._TextEntry_creators(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var websiteImplementors = []string{"Website"}
+
+func (ec *executionContext) _Website(ctx context.Context, sel ast.SelectionSet, obj *model.Website) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, websiteImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Website")
+		case "id":
+			out.Values[i] = ec._Website_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "url":
+			out.Values[i] = ec._Website_url(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "kind":
+			out.Values[i] = ec._Website_kind(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "title":
+			out.Values[i] = ec._Website_title(ctx, field, obj)
+		case "description":
+			out.Values[i] = ec._Website_description(ctx, field, obj)
+		case "createdAt":
+			out.Values[i] = ec._Website_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updatedAt":
+			out.Values[i] = ec._Website_updatedAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -3207,6 +3820,20 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) marshalNDimensions2githubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐDimensions(ctx context.Context, sel ast.SelectionSet, v model.Dimensions) graphql.Marshaler {
+	return ec._Dimensions(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNDimensions2ᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐDimensions(ctx context.Context, sel ast.SelectionSet, v *model.Dimensions) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Dimensions(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNEntity2githubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐEntity(ctx context.Context, sel ast.SelectionSet, v model.Entity) graphql.Marshaler {
 	return ec._Entity(ctx, sel, &v)
 }
@@ -3258,20 +3885,7 @@ func (ec *executionContext) marshalNEntity2ᚖgithubᚗcomᚋvoidfilesᚋmagda�
 	return ec._Entity(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNEntityKind2githubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐEntityKind(ctx context.Context, v interface{}) (model.EntityKind, error) {
-	var res model.EntityKind
-	return res, res.UnmarshalGQL(v)
-}
-
-func (ec *executionContext) marshalNEntityKind2githubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐEntityKind(ctx context.Context, sel ast.SelectionSet, v model.EntityKind) graphql.Marshaler {
-	return v
-}
-
 func (ec *executionContext) marshalNEntry2githubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐEntry(ctx context.Context, sel ast.SelectionSet, v model.Entry) graphql.Marshaler {
-	return ec._Entry(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNEntry2ᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐEntry(ctx context.Context, sel ast.SelectionSet, v *model.Entry) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -3281,20 +3895,25 @@ func (ec *executionContext) marshalNEntry2ᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋ
 	return ec._Entry(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNEntryKind2githubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐEntryKind(ctx context.Context, v interface{}) (model.EntryKind, error) {
-	var res model.EntryKind
-	return res, res.UnmarshalGQL(v)
+func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
+	return graphql.UnmarshalID(v)
 }
 
-func (ec *executionContext) marshalNEntryKind2githubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐEntryKind(ctx context.Context, sel ast.SelectionSet, v model.EntryKind) graphql.Marshaler {
-	return v
+func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	res := graphql.MarshalID(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
 }
 
-func (ec *executionContext) marshalNFile2githubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐFile(ctx context.Context, sel ast.SelectionSet, v model.File) graphql.Marshaler {
-	return ec._File(ctx, sel, &v)
+func (ec *executionContext) marshalNImage2githubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐImage(ctx context.Context, sel ast.SelectionSet, v model.Image) graphql.Marshaler {
+	return ec._Image(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNFile2ᚕᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐFileᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.File) graphql.Marshaler {
+func (ec *executionContext) marshalNImage2ᚕᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐImageᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Image) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -3318,7 +3937,7 @@ func (ec *executionContext) marshalNFile2ᚕᚖgithubᚗcomᚋvoidfilesᚋmagda�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNFile2ᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐFile(ctx, sel, v[i])
+			ret[i] = ec.marshalNImage2ᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐImage(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -3331,28 +3950,14 @@ func (ec *executionContext) marshalNFile2ᚕᚖgithubᚗcomᚋvoidfilesᚋmagda�
 	return ret
 }
 
-func (ec *executionContext) marshalNFile2ᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐFile(ctx context.Context, sel ast.SelectionSet, v *model.File) graphql.Marshaler {
+func (ec *executionContext) marshalNImage2ᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐImage(ctx context.Context, sel ast.SelectionSet, v *model.Image) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
 		}
 		return graphql.Null
 	}
-	return ec._File(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
-	return graphql.UnmarshalID(v)
-}
-
-func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-	res := graphql.MarshalID(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-	}
-	return res
+	return ec._Image(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNSource2githubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐSource(ctx context.Context, sel ast.SelectionSet, v model.Source) graphql.Marshaler {
@@ -3383,35 +3988,6 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) unmarshalNString2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
-	var vSlice []interface{}
-	if v != nil {
-		if tmp1, ok := v.([]interface{}); ok {
-			vSlice = tmp1
-		} else {
-			vSlice = []interface{}{v}
-		}
-	}
-	var err error
-	res := make([]string, len(vSlice))
-	for i := range vSlice {
-		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
-func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	for i := range v {
-		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
-	}
-
-	return ret
-}
-
 func (ec *executionContext) unmarshalNTime2timeᚐTime(ctx context.Context, v interface{}) (time.Time, error) {
 	return graphql.UnmarshalTime(v)
 }
@@ -3424,6 +4000,80 @@ func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel as
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNURL2string(ctx context.Context, v interface{}) (string, error) {
+	return graphql.UnmarshalString(v)
+}
+
+func (ec *executionContext) marshalNURL2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	res := graphql.MarshalString(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) marshalNWebsite2githubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐWebsite(ctx context.Context, sel ast.SelectionSet, v model.Website) graphql.Marshaler {
+	return ec._Website(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNWebsite2ᚕᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐWebsiteᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Website) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNWebsite2ᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐWebsite(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNWebsite2ᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐWebsite(ctx context.Context, sel ast.SelectionSet, v *model.Website) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Website(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNWebsiteKind2githubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐWebsiteKind(ctx context.Context, v interface{}) (model.WebsiteKind, error) {
+	var res model.WebsiteKind
+	return res, res.UnmarshalGQL(v)
+}
+
+func (ec *executionContext) marshalNWebsiteKind2githubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐWebsiteKind(ctx context.Context, sel ast.SelectionSet, v model.WebsiteKind) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -3673,6 +4323,28 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 		return graphql.Null
 	}
 	return ec.marshalOBoolean2bool(ctx, sel, *v)
+}
+
+func (ec *executionContext) marshalOEntity2githubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐEntity(ctx context.Context, sel ast.SelectionSet, v model.Entity) graphql.Marshaler {
+	return ec._Entity(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOEntity2ᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐEntity(ctx context.Context, sel ast.SelectionSet, v *model.Entity) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Entity(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOImage2githubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐImage(ctx context.Context, sel ast.SelectionSet, v model.Image) graphql.Marshaler {
+	return ec._Image(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOImage2ᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐImage(ctx context.Context, sel ast.SelectionSet, v *model.Image) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Image(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOInt2int(ctx context.Context, v interface{}) (int, error) {
