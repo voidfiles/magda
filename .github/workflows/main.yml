@@ -1,6 +1,10 @@
 name: CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
+  pull_request:
 
 jobs:
   build:
@@ -27,7 +31,7 @@ jobs:
           ${{ runner.os }}-yarn-
 
     - uses: actions/cache@v1
-      id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+      id: go-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
       with:
         path: ${{ steps.go-cache-dir-path.outputs.dir }}
         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
