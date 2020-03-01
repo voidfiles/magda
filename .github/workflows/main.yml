@@ -18,10 +18,6 @@ jobs:
       id: yarn-cache-dir-path
       run: echo "::set-output name=dir::$(cd www && yarn cache dir)"
 
-    - name: Get go cache directory path
-      id: go-cache-dir-path
-      run: echo "::set-output name=dir::$(echo $GOPATH/pkg/mod)"
-
     - uses: actions/cache@v1
       id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
       with:
@@ -31,13 +27,13 @@ jobs:
           ${{ runner.os }}-yarn-
 
     - uses: actions/cache@v1
-      id: go-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+      id: node-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
       with:
-        path: ${{ steps.go-cache-dir-path.outputs.dir }}
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        path: "./www/node_modules"
+        key: ${{ runner.os }}-yarn-node-${{ hashFiles('**/yarn.lock') }}
         restore-keys: |
-          ${{ runner.os }}-go-
-
+          ${{ runner.os }}-yarn-node
+  
     - name: Setup
       run: make setup
 
