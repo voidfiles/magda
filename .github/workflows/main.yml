@@ -9,12 +9,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Setup
-      run: make setup
 
     - name: Get yarn cache directory path
       id: yarn-cache-dir-path
-      run: echo "::set-output name=dir::$(yarn cache dir)"
+      run: echo "::set-output name=dir::$(cd www && yarn cache dir)"
+
+    - name: Get go cache directory path
+      id: go-cache-dir-path
+      run: echo "::set-output name=dir::$(echo $GOPATH/pkg/mod)"
 
     - uses: actions/cache@v1
       id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
@@ -23,6 +25,17 @@ jobs:
         key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
         restore-keys: |
           ${{ runner.os }}-yarn-
+
+    - uses: actions/cache@v1
+      id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+      with:
+        path: ${{ steps.go-cache-dir-path.outputs.dir }}
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+
+    - name: Setup
+      run: make setup
 
     - name: Test
       run: make test
