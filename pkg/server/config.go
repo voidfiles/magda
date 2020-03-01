@@ -10,6 +10,7 @@ type Config struct {
 	GoogleApplicationCredentials string
 }
 
+// ReadConfig reads in the configuration for the application
 func ReadConfig() (Config, error) {
 	viper.AddConfigPath(".")
 	if err := viper.ReadInConfig(); err != nil {

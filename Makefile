@@ -10,20 +10,40 @@ PROTODIR        =protos
 WORKDIR         :=$(PROJECT_DIR)/_workdir
 BINDIR          :=$(WORKDIR)/bin
 GOSWAGGER       :=$(BINDIR)/swagger
-FIREBASE_PATH   :=$(WORKDIR)/firebase
+WWW_DIR         :=$(PROJECT_DIR)/www
+FIREBASE_PATH   :=$(WWW_DIR)/node_modules/.bin/firebase
 
 setup:
 	mkdir -p $(WORKDIR)
-	./bin/install_firebase.sh
+	cd www && yarn install
 	./bin/install_firebase_emulators.sh
 	GOBIN=$(BINDIR) go install github.com/99designs/gqlgen
-	cd www && yarn install
+	GOBIN=$(BINDIR) go install golang.org/x/lint/golint
+	
 
 server:
 	go run main.go
 
 frontend:
-	cd www && yarn serve
+	cd $(WWW_DIR) && yarn serve
+
+golint:
+	$(BINDIR)/golint main.go
+	$(BINDIR)/golint pkg/...
+
+gotest:
+	go test ./...
+
+jstestunit:
+	cd $(WWW_DIR) && yarn run test:unit
+
+jsteste2e:
+	cd $(WWW_DIR) && yarn run test:e2e
+
+jstestfirebase:
+	cd $(WWW_DIR) && $(FIREBASE_PATH) emulators:exec --only=firestore "yarn run test:firestore"
+
+test: gotest golint jstestunit jstestfirebase
 
 run:
 	make server & make frontend

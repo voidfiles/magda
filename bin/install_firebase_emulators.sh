@@ -4,4 +4,4 @@ if [ -f "$HOME/.cache/firebase/emulators/cloud-firestore-emulator-v1.10.4.jar" ]
     exit 0
 fi
 
-$PWD/_workdir/firebase setup:emulators:firestore
+www/node_modules/.bin/firebase setup:emulators:firestore

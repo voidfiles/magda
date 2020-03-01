@@ -13,9 +13,11 @@ type authClient interface {
 	VerifyIDToken(context.Context, string) (*auth.Token, error)
 }
 
+// ContextKey is for string collision detection
 type ContextKey string
 
 const (
+	//UIDContextKey is the specific ContextKey used for the user unique id
 	UIDContextKey ContextKey = "UID"
 )
 
