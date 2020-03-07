@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"cloud.google.com/go/firestore"
 	"github.com/voidfiles/magda/graph/model"
 )
 
@@ -9,6 +10,11 @@ type Repository interface {
 	createWebsite(website model.WebsiteInput) (model.Website, error)
 }
 
+type firestoreClient interface {
+	Collection(string) *firestore.CollectionRef
+}
+
+// MustNewRepository creates a new repository
 func MustNewRepository() Repository {
 	return repository{
 		urlizer: MustNewURLizer([]string{"http", "https"}),

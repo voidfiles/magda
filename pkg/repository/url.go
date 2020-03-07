@@ -24,33 +24,36 @@ func (v validSchemes) String() string {
 	return strings.Join(v, ", ")
 }
 
+// MustNewURLizer Creates a new URLizer
 func MustNewURLizer(schemes []string) URLizer {
 	return URLizer{
 		schemes: validSchemes(schemes),
 	}
 }
 
+// URLizer validates and normalizes a URL
 type URLizer struct {
 	schemes validSchemes
 }
 
+// Validate validates and normalizes a url
 func (u URLizer) Validate(rawurl string) (string, error) {
 	rawurl = strings.Trim(rawurl, " ")
-	parsedUrl, err := urlx.ParseWithDefaultScheme(rawurl, "https")
+	parsedURL, err := urlx.ParseWithDefaultScheme(rawurl, "https")
 
 	if err != nil {
 		return rawurl, errors.Wrapf(err, "Failed to parse url: %s", rawurl)
 	}
 
-	if !u.schemes.IsValid(parsedUrl.Scheme) {
-		return rawurl, fmt.Errorf("scheme: %s is invalid must be one of %s", parsedUrl.Scheme, u.schemes.String())
+	if !u.schemes.IsValid(parsedURL.Scheme) {
+		return rawurl, fmt.Errorf("scheme: %s is invalid must be one of %s", parsedURL.Scheme, u.schemes.String())
 	}
 
-	if parsedUrl.RawPath != "" {
-		parsedUrl.RawPath = strings.Trim(parsedUrl.RawPath, "/")
+	if parsedURL.RawPath != "" {
+		parsedURL.RawPath = strings.Trim(parsedURL.RawPath, "/")
 	}
 
-	validatedURL, err := urlx.Normalize(parsedUrl)
+	validatedURL, err := urlx.Normalize(parsedURL)
 
 	if err != nil {
 		return rawurl, fmt.Errorf("Failed to normalize %s", rawurl)

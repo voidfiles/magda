@@ -3,6 +3,7 @@ module github.com/voidfiles/magda
 go 1.13
 
 require (
+	cloud.google.com/go v0.38.0
 	firebase.google.com/go v3.12.0+incompatible
 	github.com/99designs/gqlgen v0.11.1
 	github.com/goware/urlx v0.3.1
