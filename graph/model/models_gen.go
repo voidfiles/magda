@@ -102,6 +102,13 @@ type Website struct {
 	UpdatedAt   time.Time   `json:"updatedAt"`
 }
 
+type WebsiteInput struct {
+	URL         string      `json:"url"`
+	Kind        WebsiteKind `json:"kind"`
+	Title       *string     `json:"title"`
+	Description *string     `json:"description"`
+}
+
 type WebsiteKind string
 
 const (

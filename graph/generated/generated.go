@@ -78,7 +78,8 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		GetEntry func(childComplexity int, id string) int
+		CreateWebsite func(childComplexity int, input model.WebsiteInput) int
+		GetEntry      func(childComplexity int, id string) int
 	}
 
 	Source struct {
@@ -113,6 +114,7 @@ type ComplexityRoot struct {
 }
 
 type QueryResolver interface {
+	CreateWebsite(ctx context.Context, input model.WebsiteInput) (*model.Website, error)
 	GetEntry(ctx context.Context, id string) (model.Entry, error)
 }
 
@@ -277,6 +279,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ImageEntry.Title(childComplexity), true
+
+	case "Query.createWebsite":
+		if e.complexity.Query.CreateWebsite == nil {
+			break
+		}
+
+		args, err := ec.field_Query_createWebsite_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.CreateWebsite(childComplexity, args["input"].(model.WebsiteInput)), true
 
 	case "Query.getEntry":
 		if e.complexity.Query.GetEntry == nil {
@@ -593,8 +607,15 @@ type TextEntry {
 
 union Entry = TextEntry | ImageEntry
 
+input WebsiteInput {
+  url: URL!
+  kind: WebsiteKind!
+  title: String
+  description: String
+}
 
 type Query {
+  createWebsite(input: WebsiteInput!): Website
   getEntry(id: ID!): Entry!
 }`, BuiltIn: false},
 }
@@ -615,6 +636,20 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_createWebsite_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.WebsiteInput
+	if tmp, ok := rawArgs["input"]; ok {
+		arg0, err = ec.unmarshalNWebsiteInput2githubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐWebsiteInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -1362,6 +1397,44 @@ func (ec *executionContext) _ImageEntry_creators(ctx context.Context, field grap
 	res := resTmp.([]*model.Entity)
 	fc.Result = res
 	return ec.marshalNEntity2ᚕᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐEntityᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_createWebsite(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_createWebsite_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().CreateWebsite(rctx, args["input"].(model.WebsiteInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Website)
+	fc.Result = res
+	return ec.marshalOWebsite2ᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐWebsite(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getEntry(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3129,6 +3202,42 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputWebsiteInput(ctx context.Context, obj interface{}) (model.WebsiteInput, error) {
+	var it model.WebsiteInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "url":
+			var err error
+			it.URL, err = ec.unmarshalNURL2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "kind":
+			var err error
+			it.Kind, err = ec.unmarshalNWebsiteKind2githubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐWebsiteKind(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "title":
+			var err error
+			it.Title, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "description":
+			var err error
+			it.Description, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -3366,6 +3475,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
+		case "createWebsite":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_createWebsite(ctx, field)
+				return res
+			})
 		case "getEntry":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -4067,6 +4187,10 @@ func (ec *executionContext) marshalNWebsite2ᚖgithubᚗcomᚋvoidfilesᚋmagda�
 	return ec._Website(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNWebsiteInput2githubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐWebsiteInput(ctx context.Context, v interface{}) (model.WebsiteInput, error) {
+	return ec.unmarshalInputWebsiteInput(ctx, v)
+}
+
 func (ec *executionContext) unmarshalNWebsiteKind2githubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐWebsiteKind(ctx context.Context, v interface{}) (model.WebsiteKind, error) {
 	var res model.WebsiteKind
 	return res, res.UnmarshalGQL(v)
@@ -4391,6 +4515,17 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 		return graphql.Null
 	}
 	return ec.marshalOString2string(ctx, sel, *v)
+}
+
+func (ec *executionContext) marshalOWebsite2githubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐWebsite(ctx context.Context, sel ast.SelectionSet, v model.Website) graphql.Marshaler {
+	return ec._Website(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOWebsite2ᚖgithubᚗcomᚋvoidfilesᚋmagdaᚋgraphᚋmodelᚐWebsite(ctx context.Context, sel ast.SelectionSet, v *model.Website) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Website(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

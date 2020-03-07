@@ -125,7 +125,14 @@ type TextEntry {
 
 union Entry = TextEntry | ImageEntry
 
+input WebsiteInput {
+  url: URL!
+  kind: WebsiteKind!
+  title: String
+  description: String
+}
 
 type Query {
+  createWebsite(input: WebsiteInput!): Website
   getEntry(id: ID!): Entry!
 }

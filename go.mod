@@ -5,6 +5,7 @@ go 1.13
 require (
 	firebase.google.com/go v3.12.0+incompatible
 	github.com/99designs/gqlgen v0.11.1
+	github.com/goware/urlx v0.3.1
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.18.0

@@ -10,6 +10,10 @@ import (
 	"github.com/voidfiles/magda/graph/model"
 )
 
+func (r *queryResolver) CreateWebsite(ctx context.Context, input model.WebsiteInput) (*model.Website, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 func (r *queryResolver) GetEntry(ctx context.Context, id string) (model.Entry, error) {
 	panic(fmt.Errorf("not implemented"))
 }
