@@ -32,6 +32,7 @@ describe("firestore.rules", () => {
     const profile = db.collection("users").doc("alice");
     await firebase.assertFails(profile.set({ birthday: "January 1" }));
   });
+
   it("should only let users create their own profile", async () => {
     const db = authedApp({ uid: "alice" });
     await firebase.assertSucceeds(
@@ -64,5 +65,17 @@ describe("firestore.rules", () => {
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         })
     );
+  });
+
+  it("requires users to log in before accessing documents", async () => {
+    const db = authedApp(null);
+    const entity = db.collection("entities").doc("alice");
+    await firebase.assertFails(entity.get());
+  });
+
+  it("users cannot modify most documents in the database", async () => {
+    const db = authedApp(null);
+    const entity = db.collection("entities").doc("alice");
+    await firebase.assertFails(entity.set({ b: "c" }));
   });
 });

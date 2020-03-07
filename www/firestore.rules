@@ -1,9 +1,14 @@
 service cloud.firestore {
   match /databases/{database}/documents {
     match /users/{userId} {
-      allow read;
       allow create: if (request.auth.uid == userId || request.auth.token.role == "admin") && request.resource.data.createdAt == request.time;
-      allow write: if request.auth.token.role == "admin"
+      allow write: if request.auth.token.role == "admin";
+    }
+
+    match /* {
+      allow read;
+      allow create: if request.auth.token.role == "admin";
+      allow write: if request.auth.token.role == "admin";
     }
   }
 }
