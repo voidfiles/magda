@@ -1,14 +1,55 @@
 package repository
 
 import (
+	"context"
+	"encoding/base64"
+	"fmt"
+	"log"
+	"os"
 	"testing"
 
+	"cloud.google.com/go/firestore"
 	"github.com/stretchr/testify/assert"
 	"github.com/voidfiles/magda/graph/model"
+	"golang.org/x/oauth2"
+	"google.golang.org/api/option"
 )
 
+func createInsecureJWT(uid, role string) string {
+	header := `{"alg":"none","kid":"fakekid"}`
+	body := fmt.Sprintf(`{"iat":0,"sub":"%s","uid":"%s","role":"%s"}`, uid, uid, role)
+
+	return fmt.Sprintf(
+		"%s.%s",
+		base64.RawURLEncoding.EncodeToString([]byte(header)),
+		base64.RawURLEncoding.EncodeToString([]byte(body)),
+	)
+}
+
+func getClient() *firestore.Client {
+	os.Setenv("FIRESTORE_EMULATOR_HOST", "localhost:8972")
+	ctx := context.Background()
+
+	token := createInsecureJWT("a", "admin")
+	fmt.Printf("%s\n", token)
+	client, err := firestore.NewClient(
+		ctx,
+		"magdatest",
+		option.WithTokenSource(oauth2.StaticTokenSource(&oauth2.Token{
+			AccessToken:  createInsecureJWT("a", "admin"),
+			TokenType:    "Bearer",
+			RefreshToken: "",
+		})),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return client
+}
 func TestCreateWebsiteError(t *testing.T) {
-	r := MustNewRepository()
+	client := getClient()
+	r := MustNewRepository(client)
 
 	hello := "hello"
 	description := "this is a great website"
@@ -29,7 +70,7 @@ func TestCreateWebsiteError(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		_, err := r.createWebsite(c.input)
+		_, err := r.createWebsite(context.TODO(), c.input)
 		assert.EqualError(t, err, c.output)
 	}
 
@@ -40,7 +81,8 @@ func refOfString(str string) *string {
 }
 
 func TestCreateWebsite(t *testing.T) {
-	r := MustNewRepository()
+	client := getClient()
+	r := MustNewRepository(client)
 
 	cases := []struct {
 		input  model.WebsiteInput
@@ -63,7 +105,7 @@ func TestCreateWebsite(t *testing.T) {
 	}
 
 	for _, ce := range cases {
-		website, err := r.createWebsite(ce.input)
+		website, err := r.createWebsite(context.TODO(), ce.input)
 		assert.NoError(t, err)
 		assert.Equal(t, ce.output.URL, website.URL)
 		// assert.Equal(t, websiteInput.Kind, website.Kind)

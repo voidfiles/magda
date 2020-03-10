@@ -14,7 +14,9 @@ require (
 	github.com/stretchr/testify v1.4.0
 	github.com/vektah/gqlparser/v2 v2.0.1
 	golang.org/x/lint v0.0.0-20190409202823-959b441ac422
+	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	golang.org/x/tools v0.0.0-20200131211209-ecb101ed6550 // indirect
 	google.golang.org/api v0.17.0
+	google.golang.org/grpc v1.27.0
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )

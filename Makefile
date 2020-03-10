@@ -60,3 +60,6 @@ test: gotest golint jstestunit jstestfirebase
 
 run:
 	make server & make frontend
+
+run_firestore:
+	$(GCLOUD_CMD) beta emulators firestore start --host-port=localhost:8972 --rules=$(WWW_DIR)/firestore.rules
