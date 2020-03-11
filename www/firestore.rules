@@ -5,7 +5,9 @@ service cloud.firestore {
       allow write: if request.auth.token.role == "admin";
     }
 
-    match /* {
+
+
+    match /Websites/{document=**} {
       allow read;
       allow create: if request.auth.token.role == "admin";
       allow write: if request.auth.token.role == "admin";

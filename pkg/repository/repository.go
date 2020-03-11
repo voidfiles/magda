@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
+	"time"
 
 	"cloud.google.com/go/firestore"
 	"github.com/pkg/errors"
@@ -30,6 +31,16 @@ type repository struct {
 	fs      *firestore.Client
 }
 
+type createWebsite struct {
+	ID          string    `firestore:"id"`
+	URL         string    `firestore:"url"`
+	Title       *string   `firestore:"title"`
+	Description *string   `firestore:"description"`
+	Kind        string    `firestore:"kind"`
+	CreatedAt   time.Time `firestore:"created_at"`
+	UpdatedAt   time.Time `firestore:"updated_at"`
+}
+
 func (r repository) createWebsite(ctx context.Context, website model.WebsiteInput) (model.Website, error) {
 	url, err := r.urlizer.Validate(website.URL)
 
@@ -37,22 +48,47 @@ func (r repository) createWebsite(ctx context.Context, website model.WebsiteInpu
 		return model.Website{}, err
 	}
 
-	// TODO: I need to add in server time stamp thingies here
-	// TODO: Also need to make sure to maybe unhook the create model, from model.Website
-	newWebsite := model.Website{
+	websites := r.fs.Collection("Websites")
+	id := fmt.Sprintf("%x", sha256.Sum256([]byte(url)))
+	websiteRef := websites.Doc(id)
+
+	forCreate := createWebsite{
+		ID:          id,
 		URL:         url,
 		Title:       website.Title,
 		Description: website.Description,
+		Kind:        website.Kind.String(),
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
 	}
 
-	websites := r.fs.Collection("Websites")
-	websiteRef := websites.Doc(fmt.Sprintf("%x", sha256.Sum256([]byte(url))))
-
-	_, err = websiteRef.Create(ctx, newWebsite)
+	_, err = websiteRef.Create(ctx, forCreate)
 	if err != nil {
 		if status.Code(err) != codes.AlreadyExists {
 			return model.Website{}, errors.Wrap(err, "Failed save website")
 		}
+	}
+
+	wr, err := websiteRef.Get(ctx)
+	if err != nil {
+		return model.Website{}, errors.Wrap(err, "Failed save website")
+	}
+
+	var cw createWebsite
+
+	err = wr.DataTo(&cw)
+
+	if err != nil {
+		return model.Website{}, errors.Wrap(err, "Failed save website")
+	}
+
+	newWebsite := model.Website{
+		URL:         cw.URL,
+		Title:       cw.Title,
+		Description: cw.Description,
+		Kind:        website.Kind,
+		CreatedAt:   cw.CreatedAt,
+		UpdatedAt:   cw.UpdatedAt,
 	}
 
 	return newWebsite, nil

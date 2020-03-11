@@ -54,6 +54,7 @@ describe("firestore.rules", () => {
         })
     );
   });
+
   it("should allow admins to write for others", async () => {
     const db = authedApp({ uid: "alice", role: "admin" });
     await firebase.assertSucceeds(
@@ -63,6 +64,18 @@ describe("firestore.rules", () => {
         .set({
           birthday: "January 1",
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        })
+    );
+  });
+
+  it("should allow admins to write Websites", async () => {
+    const db = authedApp({ uid: "alice", role: "admin" });
+    await firebase.assertSucceeds(
+      db
+        .collection("Websites")
+        .doc("bbb")
+        .set({
+          bbb: "ccc"
         })
     );
   });
