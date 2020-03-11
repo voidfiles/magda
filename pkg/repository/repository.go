@@ -79,7 +79,7 @@ func (r repository) createWebsite(ctx context.Context, website model.WebsiteInpu
 	err = wr.DataTo(&cw)
 
 	if err != nil {
-		return model.Website{}, errors.Wrap(err, "Failed save website")
+		return model.Website{}, errors.Wrap(err, "Failed save website ab")
 	}
 
 	newWebsite := model.Website{

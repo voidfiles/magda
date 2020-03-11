@@ -42,7 +42,10 @@ golint:
 	$(BINDIR)/golint pkg/...
 
 gotest:
+	make run_firestore &
 	go test ./...
+	killall java
+
 
 jstestunit:
 	cd $(WWW_DIR) && yarn run test:unit

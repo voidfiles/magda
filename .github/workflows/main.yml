@@ -37,5 +37,8 @@ jobs:
     - name: Setup
       run: make setup
 
+    - name: Setup
+      run: make install_gcloud
+
     - name: Test
       run: make test
