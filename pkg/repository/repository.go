@@ -15,7 +15,7 @@ import (
 
 // Repository is the interface to magda data
 type Repository interface {
-	createWebsite(ctx context.Context, website model.WebsiteInput) (model.Website, error)
+	CreateWebsite(ctx context.Context, website model.WebsiteInput) (model.Website, error)
 }
 
 // MustNewRepository creates a new repository
@@ -41,7 +41,7 @@ type createWebsite struct {
 	UpdatedAt   time.Time `firestore:"updated_at"`
 }
 
-func (r repository) createWebsite(ctx context.Context, website model.WebsiteInput) (model.Website, error) {
+func (r repository) CreateWebsite(ctx context.Context, website model.WebsiteInput) (model.Website, error) {
 	url, err := r.urlizer.Validate(website.URL)
 
 	if err != nil {

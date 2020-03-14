@@ -89,7 +89,7 @@ func TestCreateWebsiteError(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		_, err := r.createWebsite(context.TODO(), c.input)
+		_, err := r.CreateWebsite(context.TODO(), c.input)
 		assert.EqualError(t, err, c.output)
 	}
 
@@ -124,7 +124,7 @@ func TestCreateWebsite(t *testing.T) {
 	}
 
 	for _, ce := range cases {
-		website, err := r.createWebsite(context.TODO(), ce.input)
+		website, err := r.CreateWebsite(context.TODO(), ce.input)
 		assert.NoError(t, err)
 		assert.Equal(t, ce.output.URL, website.URL)
 		assert.Equal(t, ce.input.Kind, website.Kind)

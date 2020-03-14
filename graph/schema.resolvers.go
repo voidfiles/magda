@@ -11,7 +11,9 @@ import (
 )
 
 func (r *queryResolver) CreateWebsite(ctx context.Context, input model.WebsiteInput) (*model.Website, error) {
-	panic(fmt.Errorf("not implemented"))
+	web, err := r.repo.CreateWebsite(ctx, input)
+
+	return &web, err
 }
 
 func (r *queryResolver) GetEntry(ctx context.Context, id string) (model.Entry, error) {
