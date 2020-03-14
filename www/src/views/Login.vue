@@ -10,7 +10,7 @@ import "firebaseui/dist/firebaseui.css";
 export default {
   name: "Login",
   props: ["redirect"],
-  mounted: function () {
+  mounted: function() {
     let ui = firebaseui.auth.AuthUI.getInstance();
     if (!ui) {
       ui = new firebaseui.auth.AuthUI(firebase.auth());

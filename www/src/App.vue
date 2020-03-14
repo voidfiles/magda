@@ -7,7 +7,7 @@
         <router-link to="/login">Login</router-link>
       </span>
       <span v-if="user">
-        <router-link to="/signout" >SignOut</router-link>
+        <router-link to="/signout">SignOut</router-link>
       </span>
     </div>
     <router-view />
