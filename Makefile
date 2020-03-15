@@ -10,13 +10,10 @@ ifeq ($(OS),darwin)
 else
 	MACOS_OR_LINUX    :=linux
 endif
-DST_DIR         =gen
-PROTODIR        =protos
+
 WORKDIR         :=$(PROJECT_DIR)/_workdir
 BINDIR          :=$(WORKDIR)/bin
-GOSWAGGER       :=$(BINDIR)/swagger
 WWW_DIR         :=$(PROJECT_DIR)/www
-FIREBASE_PATH   :=$(WWW_DIR)/node_modules/.bin/firebase
 GCOULD_VERSION  :=283.0.0
 GCLOUD_FILENAME :=google-cloud-sdk-$(GCOULD_VERSION)-$(OS)-x86_64.tar.gz
 GCLOUD_URL      :=https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/$(GCLOUD_FILENAME)
@@ -31,7 +28,6 @@ OVERMIND_CMD      :=$(WORKDIR)/overmind
 setup: workdir install_gcloud install_overmind
 	mkdir -p $(WORKDIR)
 	cd www && yarn install
-	./bin/install_firebase_emulators.sh
 	GOBIN=$(BINDIR) go install github.com/99designs/gqlgen
 	GOBIN=$(BINDIR) go install golang.org/x/lint/golint
 	GOBIN=$(BINDIR) go install github.com/DarthSim/overmind
