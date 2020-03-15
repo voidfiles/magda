@@ -13,13 +13,10 @@ require (
 	github.com/gorilla/websocket v1.4.1 // indirect
 	github.com/goware/urlx v0.3.1
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
-	github.com/joho/godotenv v1.3.0 // indirect
 	github.com/kr/pretty v0.2.0 // indirect
-	github.com/matoous/go-nanoid v1.2.0 // indirect
 	github.com/matryer/moq v0.0.0-20200310130814-7721994d1b54 // indirect
 	github.com/pelletier/go-toml v1.6.0 // indirect
 	github.com/pkg/errors v0.9.1
-	github.com/pkg/term v0.0.0-20190109203006-aa71e9d9e942 // indirect
 	github.com/rs/zerolog v1.18.0
 	github.com/spf13/afero v1.2.2 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
@@ -36,6 +33,5 @@ require (
 	google.golang.org/genproto v0.0.0-20200313141609-30c55424f95d // indirect
 	google.golang.org/grpc v1.28.0
 	gopkg.in/ini.v1 v1.55.0 // indirect
-	gopkg.in/urfave/cli.v1 v1.20.0 // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
