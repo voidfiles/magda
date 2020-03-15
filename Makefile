@@ -28,6 +28,7 @@ setup:
 install_gcloud:
 	curl $(GCLOUD_URL) > $(WORKDIR)/$(GCLOUD_FILENAME)
 	cd $(WORKDIR) && tar -xzf $(GCLOUD_FILENAME)
+	$(GCLOUD_CMD) components install --quiet beta
 
 generate:
 	go run github.com/99designs/gqlgen generate
