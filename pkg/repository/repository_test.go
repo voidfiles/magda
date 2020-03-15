@@ -136,3 +136,55 @@ func TestCreateWebsite(t *testing.T) {
 		assert.NotNil(t, website.ID)
 	}
 }
+
+func TestFindWebsite(t *testing.T) {
+	client := getClient()
+	r := MustNewRepository(client)
+
+	cases := []struct {
+		input  model.WebsiteSearch
+		output model.Website
+	}{
+		{
+			input: model.WebsiteSearch{
+				ID:  refOfString("100680ad546ce6a577f42f52df33b4cfdca756859e664b8d7de329b150d09ce9"),
+				URL: nil,
+			},
+			output: model.Website{
+				ID:  "100680ad546ce6a577f42f52df33b4cfdca756859e664b8d7de329b150d09ce9",
+				URL: "https://example.com",
+			},
+		},
+		{
+			input: model.WebsiteSearch{
+				ID:  refOfString("100680ad546ce6a577f42f52df33b4cfdca756859e664b8d7de329b150d09ce9"),
+				URL: refOfString("https://example.com"),
+			},
+			output: model.Website{
+				ID:  "100680ad546ce6a577f42f52df33b4cfdca756859e664b8d7de329b150d09ce9",
+				URL: "https://example.com",
+			},
+		},
+		{
+			input: model.WebsiteSearch{
+				ID:  nil,
+				URL: refOfString("https://example.com"),
+			},
+			output: model.Website{
+				ID:  "100680ad546ce6a577f42f52df33b4cfdca756859e664b8d7de329b150d09ce9",
+				URL: "https://example.com",
+			},
+		},
+	}
+	_, err := r.CreateWebsite(context.TODO(), model.WebsiteInput{
+		URL:  "https://example.com",
+		Kind: model.WebsiteKindSite,
+	})
+	assert.NoError(t, err)
+	for _, ce := range cases {
+		website, err := r.FindWebsite(context.TODO(), ce.input)
+		assert.NoError(t, err)
+		assert.Equal(t, website.ID, ce.output.ID)
+
+	}
+}

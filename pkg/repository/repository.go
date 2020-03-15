@@ -16,6 +16,7 @@ import (
 // Repository is the interface to magda data
 type Repository interface {
 	CreateWebsite(ctx context.Context, website model.WebsiteInput) (model.Website, error)
+	FindWebsite(ctx context.Context, websiteSearch model.WebsiteSearch) (model.Website, error)
 }
 
 // MustNewRepository creates a new repository
@@ -41,6 +42,45 @@ type createWebsite struct {
 	UpdatedAt   time.Time `firestore:"updated_at"`
 }
 
+func (r repository) FindWebsite(ctx context.Context, websiteSearch model.WebsiteSearch) (model.Website, error) {
+	var websiteSearchID string
+
+	if websiteSearch.ID != nil {
+		websiteSearchID = *websiteSearch.ID
+	} else {
+		url, err := r.urlizer.Validate(*websiteSearch.URL)
+		if err != nil {
+			return model.Website{}, errors.Wrap(err, "URL is invalid")
+		}
+		websiteSearchID = hashURL(url)
+	}
+	websites := r.fs.Collection("Websites")
+	websiteRef := websites.Doc(websiteSearchID)
+	wr, err := websiteRef.Get(ctx)
+	if err != nil {
+		return model.Website{}, errors.Wrap(err, "Failed to find a website")
+	}
+
+	var cw createWebsite
+
+	err = wr.DataTo(&cw)
+
+	if err != nil {
+		return model.Website{}, errors.Wrap(err, "Issue marshaling response")
+	}
+	newWebsite := model.Website{
+		ID:          cw.ID,
+		URL:         cw.URL,
+		Title:       cw.Title,
+		Description: cw.Description,
+		Kind:        model.WebsiteKind(cw.Kind),
+		CreatedAt:   cw.CreatedAt,
+		UpdatedAt:   cw.UpdatedAt,
+	}
+
+	return newWebsite, nil
+}
+
 func (r repository) CreateWebsite(ctx context.Context, website model.WebsiteInput) (model.Website, error) {
 	url, err := r.urlizer.Validate(website.URL)
 
@@ -49,7 +89,7 @@ func (r repository) CreateWebsite(ctx context.Context, website model.WebsiteInpu
 	}
 
 	websites := r.fs.Collection("Websites")
-	id := fmt.Sprintf("%x", sha256.Sum256([]byte(url)))
+	id := hashURL(url)
 	websiteRef := websites.Doc(id)
 
 	forCreate := createWebsite{
@@ -83,6 +123,7 @@ func (r repository) CreateWebsite(ctx context.Context, website model.WebsiteInpu
 	}
 
 	newWebsite := model.Website{
+		ID:          cw.ID,
 		URL:         cw.URL,
 		Title:       cw.Title,
 		Description: cw.Description,
@@ -92,4 +133,8 @@ func (r repository) CreateWebsite(ctx context.Context, website model.WebsiteInpu
 	}
 
 	return newWebsite, nil
+}
+
+func hashURL(url string) string {
+	return fmt.Sprintf("%x", sha256.Sum256([]byte(url)))
 }

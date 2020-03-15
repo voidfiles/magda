@@ -132,7 +132,17 @@ input WebsiteInput {
   description: String
 }
 
+
+"""
+WebsiteSearch is a query for websites, you can only have id, or url.
+"""
+input WebsiteSearch {
+  id: String
+  url: URL
+}
+
 type Query {
+  findWebsite(input: WebsiteSearch!): Website
   createWebsite(input: WebsiteInput!): Website
   getEntry(id: ID!): Entry!
 }

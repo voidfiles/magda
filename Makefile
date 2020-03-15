@@ -23,6 +23,7 @@ setup:
 	./bin/install_firebase_emulators.sh
 	GOBIN=$(BINDIR) go install github.com/99designs/gqlgen
 	GOBIN=$(BINDIR) go install golang.org/x/lint/golint
+	GOBIN=$(BINDIR) go install github.com/ddollar/forego
 
 install_gcloud:
 	curl $(GCLOUD_URL) > $(WORKDIR)/$(GCLOUD_FILENAME)
@@ -62,7 +63,7 @@ gcloud_init:
 test: gotest golint jstestunit jstestfirebase
 
 run:
-	make server & make frontend
+	$(BINDIR)/forego start
 
 run_firestore:
 	$(GCLOUD_CMD) beta emulators firestore start --quiet --host-port=localhost:8972 --rules=$(WWW_DIR)/firestore.rules

@@ -10,6 +10,12 @@ import (
 	"github.com/voidfiles/magda/graph/model"
 )
 
+func (r *queryResolver) FindWebsite(ctx context.Context, input model.WebsiteSearch) (*model.Website, error) {
+	web, err := r.repo.FindWebsite(ctx, input)
+
+	return &web, err
+}
+
 func (r *queryResolver) CreateWebsite(ctx context.Context, input model.WebsiteInput) (*model.Website, error) {
 	web, err := r.repo.CreateWebsite(ctx, input)
 
