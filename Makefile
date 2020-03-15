@@ -62,6 +62,10 @@ gcloud_init:
 
 test: gotest golint jstestunit jstestfirebase
 
+update:
+	cd $(WWW_DIR) && yarn upgrade
+	go get -u
+
 run:
 	$(BINDIR)/forego start
 

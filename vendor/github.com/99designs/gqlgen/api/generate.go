@@ -75,7 +75,7 @@ func Generate(cfg *config.Config, option ...Option) error {
 	}
 
 	if err = codegen.GenerateCode(data); err != nil {
-		return errors.Wrap(err, "generating code failed")
+		return errors.Wrap(err, "generating core failed")
 	}
 
 	for _, p := range plugins {

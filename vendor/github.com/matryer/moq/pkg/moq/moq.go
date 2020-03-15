@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"go/format"
+	"go/build"
 	"go/types"
 	"io"
 	"os"
@@ -16,66 +16,38 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-// This list comes from the golint codebase. Golint will complain about any of
-// these being mixed-case, like "Id" instead of "ID".
-var golintInitialisms = []string{
-	"ACL",
-	"API",
-	"ASCII",
-	"CPU",
-	"CSS",
-	"DNS",
-	"EOF",
-	"GUID",
-	"HTML",
-	"HTTP",
-	"HTTPS",
-	"ID",
-	"IP",
-	"JSON",
-	"LHS",
-	"QPS",
-	"RAM",
-	"RHS",
-	"RPC",
-	"SLA",
-	"SMTP",
-	"SQL",
-	"SSH",
-	"TCP",
-	"TLS",
-	"TTL",
-	"UDP",
-	"UI",
-	"UID",
-	"UUID",
-	"URI",
-	"URL",
-	"UTF8",
-	"VM",
-	"XML",
-	"XMPP",
-	"XSRF",
-	"XSS",
-}
-
 // Mocker can generate mock structs.
 type Mocker struct {
 	srcPkg  *packages.Package
 	tmpl    *template.Template
 	pkgName string
 	pkgPath string
+	fmter   func(src []byte) ([]byte, error)
 
 	imports map[string]bool
 }
 
+// Config specifies details about how interfaces should be mocked.
+// SrcDir is the only field which needs be specified.
+type Config struct {
+	SrcDir    string
+	PkgName   string
+	Formatter string
+}
+
 // New makes a new Mocker for the specified package directory.
-func New(src, packageName string) (*Mocker, error) {
-	srcPkg, err := pkgInfoFromPath(src, packages.LoadSyntax)
+func New(conf Config) (*Mocker, error) {
+	srcPkg, err := pkgInfoFromPath(conf.SrcDir, packages.NeedName|packages.NeedTypes|packages.NeedTypesInfo)
 	if err != nil {
 		return nil, fmt.Errorf("couldn't load source package: %s", err)
 	}
-	pkgPath, err := findPkgPath(packageName, srcPkg)
+
+	pkgName := conf.PkgName
+	if pkgName == "" {
+		pkgName = srcPkg.Name
+	}
+
+	pkgPath, err := findPkgPath(conf.PkgName, srcPkg)
 	if err != nil {
 		return nil, fmt.Errorf("couldn't load mock package: %s", err)
 	}
@@ -84,20 +56,20 @@ func New(src, packageName string) (*Mocker, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	fmter := gofmt
+	if conf.Formatter == "goimports" {
+		fmter = goimports
+	}
+
 	return &Mocker{
 		tmpl:    tmpl,
 		srcPkg:  srcPkg,
-		pkgName: preventZeroStr(packageName, srcPkg.Name),
+		pkgName: pkgName,
 		pkgPath: pkgPath,
+		fmter:   fmter,
 		imports: make(map[string]bool),
 	}, nil
-}
-
-func preventZeroStr(val, defaultVal string) string {
-	if val == "" {
-		return defaultVal
-	}
-	return val
 }
 
 func findPkgPath(pkgInputVal string, srcPkg *packages.Package) (string, error) {
@@ -118,7 +90,7 @@ func findPkgPath(pkgInputVal string, srcPkg *packages.Package) (string, error) {
 }
 
 func pkgInDir(pkgName, dir string) bool {
-	currentPkg, err := pkgInfoFromPath(dir, packages.LoadFiles)
+	currentPkg, err := pkgInfoFromPath(dir, packages.NeedName)
 	if err != nil {
 		return false
 	}
@@ -177,7 +149,7 @@ func (m *Mocker) Mock(w io.Writer, names ...string) error {
 
 	if tpkg.Name() != m.pkgName {
 		doc.SourcePackagePrefix = tpkg.Name() + "."
-		doc.Imports = append(doc.Imports, tpkg.Path())
+		doc.Imports = append(doc.Imports, stripVendorPath(tpkg.Path()))
 	}
 
 	var buf bytes.Buffer
@@ -185,9 +157,9 @@ func (m *Mocker) Mock(w io.Writer, names ...string) error {
 	if err != nil {
 		return err
 	}
-	formatted, err := format.Source(buf.Bytes())
+	formatted, err := m.fmter(buf.Bytes())
 	if err != nil {
-		return fmt.Errorf("go/format: %s", err)
+		return err
 	}
 	if _, err := w.Write(formatted); err != nil {
 		return err
@@ -232,12 +204,11 @@ func (m *Mocker) extractArgs(sig *types.Signature, list *types.Tuple, nameFormat
 	return params
 }
 
-func pkgInfoFromPath(src string, mode packages.LoadMode) (*packages.Package, error) {
-	conf := packages.Config{
+func pkgInfoFromPath(srcDir string, mode packages.LoadMode) (*packages.Package, error) {
+	pkgs, err := packages.Load(&packages.Config{
 		Mode: mode,
-		Dir:  src,
-	}
-	pkgs, err := packages.Load(&conf)
+		Dir:  srcDir,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -355,18 +326,15 @@ func stripVendorPath(p string) string {
 	return strings.TrimLeft(path.Join(parts[1:]...), "/")
 }
 
-// stripGopath takes the directory to a package and remove the gopath to get the
-// canonical package name.
-//
-// taken from https://github.com/ernesto-jimenez/gogen
-// Copyright (c) 2015 Ernesto Jiménez
+// stripGopath takes the directory to a package and removes the
+// $GOPATH/src path to get the canonical package name.
 func stripGopath(p string) string {
-	for _, gopath := range gopaths() {
-		p = strings.TrimPrefix(p, path.Join(gopath, "src")+"/")
+	for _, srcDir := range build.Default.SrcDirs() {
+		rel, err := filepath.Rel(srcDir, p)
+		if err != nil || strings.HasPrefix(rel, "..") {
+			continue
+		}
+		return filepath.ToSlash(rel)
 	}
 	return p
-}
-
-func gopaths() []string {
-	return strings.Split(os.Getenv("GOPATH"), string(filepath.ListSeparator))
 }
