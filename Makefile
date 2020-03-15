@@ -30,7 +30,6 @@ setup: workdir install_gcloud install_overmind
 	cd www && yarn install
 	GOBIN=$(BINDIR) go install github.com/99designs/gqlgen
 	GOBIN=$(BINDIR) go install golang.org/x/lint/golint
-	GOBIN=$(BINDIR) go install github.com/DarthSim/overmind
 
 workdir:
 	mkdir -p $(WORKDIR)
