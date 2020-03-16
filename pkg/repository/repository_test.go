@@ -29,7 +29,8 @@ func (t token) RequireTransportSecurity() bool {
 	return false
 }
 
-func createInsecureJWT(uid, role string) token {
+// CreateInsecureJWT creates an token for use in testing
+func CreateInsecureJWT(uid, role string) token {
 	header := `{"alg":"none","kid":"fakekid","typ":"JWT"}`
 	body := fmt.Sprintf(`{"iat":%d,"eat":%d,"sub":"%s","uid":"%s","role":"%s"}`, time.Now().Unix(), time.Now().Unix()+10000, uid, uid, role)
 
@@ -46,7 +47,7 @@ func createInsecureJWT(uid, role string) token {
 func getClient() *firestore.Client {
 	ctx := context.Background()
 
-	token := createInsecureJWT("ab", "admin")
+	token := CreateInsecureJWT("ab", "admin")
 	conn, err := grpc.Dial(
 		"localhost:8972",
 		grpc.WithInsecure(),

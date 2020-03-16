@@ -75,6 +75,9 @@ jstestfirebase:
 gcloud_init:
 	$(GCLOUD_CMD) init
 
+overmind_dev:
+	$(OVERMIND_CMD) start -f Procfile.test
+
 overmind_test_run:
 	$(OVERMIND_CMD) start -D -f Procfile.test
 

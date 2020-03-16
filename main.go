@@ -6,52 +6,15 @@ import (
 	"net/http"
 	"os"
 
-	"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go"
-	"firebase.google.com/go/auth"
-	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/rs/zerolog"
 	"github.com/voidfiles/magda/graph"
-	"github.com/voidfiles/magda/graph/generated"
 	"github.com/voidfiles/magda/pkg/repository"
 	"github.com/voidfiles/magda/pkg/server"
 	"google.golang.org/api/option"
 )
 
 const defaultPort = "8080"
-
-// RequestHandler adds the request method and URL as a field to the context's logger
-// using fieldKey as field key.
-func RequestHandler() func(next http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			log := zerolog.Ctx(r.Context())
-			log.UpdateContext(func(c zerolog.Context) zerolog.Context {
-				return c.Str("method", r.Method).Str("path", r.URL.String())
-			})
-			next.ServeHTTP(w, r)
-		})
-	}
-}
-
-func buildGraphQLServer(logger zerolog.Logger, authClient *auth.Client, firestoreClient *firestore.Client) http.HandlerFunc {
-	repo := repository.MustNewRepository(firestoreClient)
-	resolver := graph.MustNewResolver(repo)
-	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolver}))
-
-	authSrv := server.MustNewAuthMiddleware(srv, &logger, authClient)
-	logSrv := RequestHandler()(http.HandlerFunc(authSrv.ServeHTTP))
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		localLogger := logger.With().Str("yo", "whats up").Logger()
-		r = r.WithContext(
-			localLogger.WithContext(
-				r.Context(),
-			),
-		)
-		logSrv.ServeHTTP(w, r)
-	})
-}
 
 func main() {
 
@@ -81,7 +44,9 @@ func main() {
 	if err != nil {
 		logger.Fatal().AnErr("error", err).Msg("Failed to get firestore client")
 	}
-	finalSrv := buildGraphQLServer(logger, authClient, firestoreClient)
+	repo := repository.MustNewRepository(firestoreClient)
+	resolver := graph.MustNewResolver(repo)
+	finalSrv := server.BuildGraphQLServer(logger, authClient, resolver)
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", finalSrv)
 
