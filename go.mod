@@ -7,6 +7,8 @@ require (
 	cloud.google.com/go/firestore v1.1.1
 	firebase.google.com/go v3.12.0+incompatible
 	github.com/99designs/gqlgen v0.11.3
+	github.com/PaesslerAG/gval v1.0.1 // indirect
+	github.com/brianvoe/gofakeit/v4 v4.3.0
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/golang/protobuf v1.3.5 // indirect
@@ -23,7 +25,8 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.6.2
-	github.com/steinfletcher/apitest v1.4.3
+	github.com/steinfletcher/apitest v1.4.4
+	github.com/steinfletcher/apitest-jsonpath v1.4.1
 	github.com/stretchr/testify v1.5.1
 	github.com/urfave/cli/v2 v2.2.0 // indirect
 	github.com/vektah/dataloaden v0.3.0 // indirect

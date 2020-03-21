@@ -39,6 +39,7 @@ type URLizer struct {
 // Validate validates and normalizes a url
 func (u URLizer) Validate(rawurl string) (string, error) {
 	rawurl = strings.Trim(rawurl, " ")
+	rawurl = strings.ToLower(rawurl)
 	parsedURL, err := urlx.ParseWithDefaultScheme(rawurl, "https")
 
 	if err != nil {

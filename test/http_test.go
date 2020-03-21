@@ -2,6 +2,7 @@ package http_test
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -9,13 +10,16 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
 	"cloud.google.com/go/firestore"
 	"firebase.google.com/go/auth"
+	"github.com/brianvoe/gofakeit/v4"
 	"github.com/rs/zerolog"
 	"github.com/steinfletcher/apitest"
+	jsonpath "github.com/steinfletcher/apitest-jsonpath"
 	"github.com/voidfiles/magda/graph"
 	"github.com/voidfiles/magda/pkg/repository"
 	"github.com/voidfiles/magda/pkg/server"
@@ -72,6 +76,8 @@ func CreateInsecureJWT(uid, role string) token {
 }
 
 func handler() (http.HandlerFunc, string) {
+	gofakeit.Seed(time.Now().UnixNano())
+
 	logger := zerolog.New(os.Stdout)
 	ctx := context.Background()
 
@@ -102,11 +108,20 @@ func handler() (http.HandlerFunc, string) {
 	return server.BuildGraphQLServer(logger, ac, resolver), token.Token()
 }
 
-func buildGraphQLQuery(operationName, query string, variables interface{}) string {
+type Interaction struct {
+	operationName string
+	query         string
+	variables     map[string]interface{}
+	response      string
+	status        int
+	assertions    []apitest.Assert
+}
+
+func (i Interaction) buildGraphQLQuery() string {
 	data := map[string]interface{}{
-		"operationName": operationName,
-		"variables":     variables,
-		"query":         query,
+		"operationName": i.operationName,
+		"variables":     i.variables,
+		"query":         i.query,
 	}
 
 	b, err := json.Marshal(data)
@@ -116,35 +131,141 @@ func buildGraphQLQuery(operationName, query string, variables interface{}) strin
 	return string(b)
 }
 
-func TestGraphQL(t *testing.T) {
-	qr := buildGraphQLQuery(
-		"createWebsite",
-		`query createWebsite($input: WebsiteInput!) {
-			createWebsite(input: $input) {
-				id
-				url
-			}
-		}`,
-		map[string]interface{}{
-			"input": map[string]string{
-				"url":         "http://google.com",
-				"kind":        "site",
-				"title":       "Google",
-				"description": "A search interface",
-			},
-		},
-	)
-
+func validateInteraction(t *testing.T, i Interaction) {
 	h, token := handler()
-	apitest.New().
+	request := apitest.New().
 		Handler(h).
 		Debug().
 		Post("/").
 		Header("Authorization", fmt.Sprintf("Bearer %s", token)).
 		Header("Content-Type", "application/json").
-		Body(qr).
-		Expect(t).
-		Body(`{"data":{"createWebsite":{"id":"aa2239c17609b21eba034c564af878f3eec8ce83ed0f2768597d2bc2fd4e4da5","url":"http://google.com"}}}`).
+		Body(i.buildGraphQLQuery())
+
+	response := request.
+		Expect(t)
+
+	for _, as := range i.assertions {
+		response = response.Assert(as)
+	}
+
+	response.
 		Status(http.StatusOK).
 		End()
+}
+
+func matchISO(path string) apitest.Assert {
+	return jsonpath.Matches(path, `^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(\\.[0-9]+)?(Z)?$`)
+}
+
+func hashURL(url string) string {
+	return fmt.Sprintf("%x", sha256.Sum256([]byte(url)))
+}
+
+func TestGraphQL(t *testing.T) {
+
+	url := gofakeit.URL()
+	title := gofakeit.Word()
+	description := gofakeit.Sentence(5)
+
+	is := []Interaction{
+		{
+			operationName: "createWebsite",
+			query: `query createWebsite($input: WebsiteInput!) {
+				createWebsite(input: $input) {
+					id
+					url
+					title
+					description
+					createdAt
+					updatedAt
+				}
+			}`,
+			variables: map[string]interface{}{
+				"input": map[string]string{
+					"url":         url,
+					"kind":        "site",
+					"title":       title,
+					"description": description,
+				},
+			},
+			assertions: []apitest.Assert{
+				jsonpath.Matches("$.data.createWebsite.id", `^\w+$`),
+				jsonpath.Equal("$.data.createWebsite.url", url),
+				jsonpath.Equal("$.data.createWebsite.title", title),
+				jsonpath.Equal("$.data.createWebsite.description", description),
+				matchISO("$.data.createWebsite.createdAt"),
+				matchISO("$.data.createWebsite.updatedAt"),
+			},
+			status: http.StatusOK,
+		},
+		{
+			operationName: "findWebsite",
+			query: `query findWebsite($input: WebsiteSearch!) {
+				findWebsite(input: $input) {
+					id
+					url
+					title
+					description
+					createdAt
+					updatedAt
+				}
+			}`,
+			variables: map[string]interface{}{
+				"input": map[string]string{
+					"id": hashURL(url),
+				},
+			},
+			assertions: []apitest.Assert{
+				jsonpath.Matches("$.data.findWebsite.id", `^\w+$`),
+				jsonpath.Equal("$.data.findWebsite.url", url),
+				jsonpath.Equal("$.data.findWebsite.title", title),
+				jsonpath.Equal("$.data.findWebsite.description", description),
+				matchISO("$.data.findWebsite.createdAt"),
+				matchISO("$.data.findWebsite.updatedAt"),
+			},
+			status: http.StatusOK,
+		},
+		{
+			operationName: "findWebsite",
+			query: `query findWebsite($input: WebsiteSearch!) {
+				findWebsite(input: $input) {
+					id
+					url
+				}
+			}`,
+			variables: map[string]interface{}{
+				"input": map[string]string{
+					"url": url,
+				},
+			},
+			assertions: []apitest.Assert{
+				jsonpath.Matches("$.data.findWebsite.id", `^\w+$`),
+				jsonpath.Equal("$.data.findWebsite.url", url),
+			},
+			status: http.StatusOK,
+		},
+		{
+			operationName: "findWebsite",
+			query: `query findWebsite($input: WebsiteSearch!) {
+				findWebsite(input: $input) {
+					id
+					url
+				}
+			}`,
+			variables: map[string]interface{}{
+				"input": map[string]string{
+					"url": strings.ToUpper(url),
+				},
+			},
+			assertions: []apitest.Assert{
+				jsonpath.Matches("$.data.findWebsite.id", `^\w+$`),
+				jsonpath.Equal("$.data.findWebsite.url", url),
+			},
+			status: http.StatusOK,
+		},
+	}
+	for _, i := range is {
+		validateInteraction(t, i)
+	}
+
 }
